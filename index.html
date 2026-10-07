@@ -1,0 +1,626 @@
+html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>極簡工作台 - 待辦・便條紙・日程表</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons for modern minimalist UI icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    /* Custom scrollbar for sticky notes and schedules */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.03);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-[#F8F9FA] text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          <i class="ph-bold ph-squares-four text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">極簡工作台</h1>
+          <p class="text-xs text-slate-500 hidden sm:block">待辦事項 · 便條紙 · 日程表</p>
+        </div>
+      </div>
+
+      <!-- Navigation Segment Tabs -->
+      <nav class="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/60" id="tabContainer">
+        <button onclick="switchTab('todos')" id="tabBtn-todos" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs">
+          <i class="ph-bold ph-check-circle text-base"></i>
+          <span>待辦</span>
+          <span id="badge-todo-count" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600 font-normal">0</span>
+        </button>
+        <button onclick="switchTab('notes')" id="tabBtn-notes" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+          <i class="ph-bold ph-note text-base"></i>
+          <span>便條紙</span>
+          <span id="badge-notes-count" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-200/60 text-slate-600 font-normal">0</span>
+        </button>
+        <button onclick="switchTab('schedule')" id="tabBtn-schedule" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+          <i class="ph-bold ph-calendar text-base"></i>
+          <span>日程表</span>
+          <span id="badge-schedule-count" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-200/60 text-slate-600 font-normal">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+    
+    <!-- ==================== 1. 待辦事項 (Todos View) ==================== -->
+    <section id="view-todos" class="space-y-6">
+      <!-- Input bar -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <form id="todoForm" onsubmit="addTodo(event)" class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <i class="ph-bold ph-plus absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="todoInput" required placeholder="新增待辦任務（例如：繳交專題報告、寄送會議通知）..."
+                   class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 text-sm transition">
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="todoPriority" class="py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 font-medium text-slate-700">
+              <option value="normal">一般優先度</option>
+              <option value="high">🔥 重要緊急</option>
+              <option value="low">🌱 低優先</option>
+            </select>
+            <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-98 text-white rounded-xl text-sm font-medium transition shadow-xs flex items-center justify-center gap-1.5 whitespace-nowrap">
+              <i class="ph-bold ph-plus text-base"></i>
+              <span>新增任務</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Filters & Stats -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-medium text-slate-600">
+          <button onclick="setTodoFilter('all')" id="todoFilter-all" class="px-3 py-1 rounded-lg bg-white text-slate-900 shadow-2xs font-semibold">全部</button>
+          <button onclick="setTodoFilter('active')" id="todoFilter-active" class="px-3 py-1 rounded-lg hover:text-slate-900">未完成</button>
+          <button onclick="setTodoFilter('completed')" id="todoFilter-completed" class="px-3 py-1 rounded-lg hover:text-slate-900">已完成</button>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-slate-500">
+          <span id="todoProgressText">完成度：0%</span>
+          <button onclick="clearCompletedTodos()" class="hover:text-red-600 transition flex items-center gap-1">
+            <i class="ph ph-trash"></i>
+            <span>清除已完成</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Todo List -->
+      <div id="todoList" class="space-y-2.5">
+        <!-- Javascript dynamically injects todos here -->
+      </div>
+      
+      <div id="emptyTodoList" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
+        <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+          <i class="ph-bold ph-check text-2xl"></i>
+        </div>
+        <p class="text-sm font-semibold text-slate-700">目前沒有待辦事項！</p>
+        <p class="text-xs text-slate-400 mt-1">輸入待辦任務，開始條理分明的一天</p>
+      </div>
+    </section>
+
+    <!-- ==================== 2. 便條紙 (Sticky Notes View) ==================== -->
+    <section id="view-notes" class="hidden space-y-6">
+      <!-- Create Note Trigger bar -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-bold text-slate-800 text-sm sm:text-base">靈感與隨手筆記</h2>
+          <p class="text-xs text-slate-500">快速紀錄即時想法、代碼片段或會議備忘</p>
+        </div>
+        <button onclick="openNoteModal()" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold rounded-xl text-sm transition shadow-xs flex items-center gap-1.5 active:scale-98">
+          <i class="ph-bold ph-note-pencil text-base"></i>
+          <span>貼上一張便條</span>
+        </button>
+      </div>
+
+      <!-- Notes Grid -->
+      <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Javascript dynamically injects notes here -->
+      </div>
+
+      <div id="emptyNotesList" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
+        <div class="w-12 h-12 mx-auto rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+          <i class="ph-bold ph-note text-2xl"></i>
+        </div>
+        <p class="text-sm font-semibold text-slate-700">目前還沒有便條紙</p>
+        <p class="text-xs text-slate-400 mt-1">點擊上方「貼上一張便條」紀錄靈感</p>
+      </div>
+    </section>
+
+    <!-- ==================== 3. 日程表 (Schedule View) ==================== -->
+    <section id="view-schedule" class="hidden space-y-6">
+      <!-- Add Schedule Event -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <form id="scheduleForm" onsubmit="addScheduleItem(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-4">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">事件名稱</label>
+            <input type="text" id="scheduleTitle" required placeholder="例如：專題小組討論、線上會議"
+                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+          </div>
+          <div class="sm:col-span-3">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">日期</label>
+            <input type="date" id="scheduleDate" required
+                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-700">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">時間</label>
+            <input type="time" id="scheduleTime" required
+                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-700">
+          </div>
+          <div class="sm:col-span-3 flex items-end">
+            <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-98 text-white rounded-xl text-sm font-medium transition shadow-xs flex items-center justify-center gap-1.5">
+              <i class="ph-bold ph-calendar-plus text-base"></i>
+              <span>加入日程</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Schedule Filter by Date -->
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+          <i class="ph-bold ph-clock text-slate-500"></i>
+          <span>近期日程安排</span>
+        </h3>
+        <span class="text-xs text-slate-400">依日期與時間排序</span>
+      </div>
+
+      <!-- Schedule Event Timeline Cards -->
+      <div id="scheduleList" class="space-y-3">
+        <!-- Javascript dynamically injects schedule cards here -->
+      </div>
+
+      <div id="emptyScheduleList" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
+        <div class="w-12 h-12 mx-auto rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-3">
+          <i class="ph-bold ph-calendar-x text-2xl"></i>
+        </div>
+        <p class="text-sm font-semibold text-slate-700">尚未建立任何日程</p>
+        <p class="text-xs text-slate-400 mt-1">在上方輸入日期與時間以建立行程</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Note Creation / Edit Modal -->
+  <div id="noteModal" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl border border-slate-100 transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 id="noteModalTitle" class="font-bold text-slate-900 text-base">新增便條紙</h3>
+        <button onclick="closeNoteModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center">
+          <i class="ph-bold ph-x text-lg"></i>
+        </button>
+      </div>
+      <form id="noteForm" onsubmit="saveNote(event)" class="mt-4 space-y-4">
+        <input type="hidden" id="editNoteId" value="">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">標題（選填）</label>
+          <input type="text" id="noteTitleInput" placeholder="例如：靈感點子、備忘代碼"
+                 class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">內容</label>
+          <textarea id="noteContentInput" required rows="4" placeholder="在此輸入便條內容..."
+                    class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">便條紙顏色</label>
+          <div class="flex items-center gap-3">
+            <label class="cursor-pointer">
+              <input type="radio" name="noteColor" value="yellow" checked class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-amber-200 ring-2 ring-transparent peer-checked:ring-slate-800 peer-checked:scale-110 transition"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="noteColor" value="green" class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-emerald-200 ring-2 ring-transparent peer-checked:ring-slate-800 peer-checked:scale-110 transition"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="noteColor" value="blue" class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-sky-200 ring-2 ring-transparent peer-checked:ring-slate-800 peer-checked:scale-110 transition"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="noteColor" value="rose" class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-rose-200 ring-2 ring-transparent peer-checked:ring-slate-800 peer-checked:scale-110 transition"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="noteColor" value="purple" class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-purple-200 ring-2 ring-transparent peer-checked:ring-slate-800 peer-checked:scale-110 transition"></div>
+            </label>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeNoteModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50">取消</button>
+          <button type="submit" class="px-5 py-2 bg-slate-900 text-white rounded-xl text-sm font-medium hover:bg-slate-800">保存便條</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // State initialization from localStorage or defaults
+    let state = {
+      currentTab: 'todos',
+      todoFilter: 'all',
+      todos: JSON.parse(localStorage.getItem('minimal_app_todos')) || [
+        { id: 1, text: '整理大型語言模型 12 個核心概念筆記', priority: 'high', completed: true, createdAt: '2026-10-05' },
+        { id: 2, text: '學習 Gemini Canvas 功能與網頁原型製作', priority: 'normal', completed: false, createdAt: '2026-10-06' },
+        { id: 3, text: '檢查本週日程會議並回覆團隊郵件', priority: 'low', completed: false, createdAt: '2026-10-07' }
+      ],
+      notes: JSON.parse(localStorage.getItem('minimal_app_notes')) || [
+        { id: 1, title: '常用 Prompt 技巧', content: '1. 明確角色與目標\n2. 給予條列式範例 (Few-shot)\n3. 要求逐步思考 (Chain of Thought)', color: 'yellow', updatedAt: '今天 10:20' },
+        { id: 2, title: '專案點子備忘', content: '將待辦、便條與行事曆整合成一頁式極簡儀表板，支援手機端順暢滑動。', color: 'green', updatedAt: '今天 11:45' }
+      ],
+      schedule: JSON.parse(localStorage.getItem('minimal_app_schedule')) || [
+        { id: 1, title: '電科專題小組週會', date: '2026-10-07', time: '14:30' },
+        { id: 2, title: '機器學習作業截止', date: '2026-10-09', time: '23:59' },
+        { id: 3, title: '期中線上研討會', date: '2026-10-12', time: '10:00' }
+      ]
+    };
+
+    // Save helper
+    function saveState() {
+      localStorage.setItem('minimal_app_todos', JSON.stringify(state.todos));
+      localStorage.setItem('minimal_app_notes', JSON.stringify(state.notes));
+      localStorage.setItem('minimal_app_schedule', JSON.stringify(state.schedule));
+      updateBadges();
+    }
+
+    // Tab switcher
+    function switchTab(tabId) {
+      state.currentTab = tabId;
+      const tabs = ['todos', 'notes', 'schedule'];
+      
+      tabs.forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tabBtn-${t}`);
+        if (t === tabId) {
+          view.classList.remove('hidden');
+          btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+        }
+      });
+    }
+
+    function addTodo(e) {
+      e.preventDefault();
+      const input = document.getElementById('todoInput');
+      const priority = document.getElementById('todoPriority').value;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const newTodo = {
+        id: Date.now(),
+        text: text,
+        priority: priority,
+        completed: false,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+      state.todos.unshift(newTodo);
+      input.value = '';
+      saveState();
+      renderTodos();
+    }
+
+    function toggleTodo(id) {
+      state.todos = state.todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+      saveState();
+      renderTodos();
+    }
+
+    function deleteTodo(id) {
+      state.todos = state.todos.filter(t => t.id !== id);
+      saveState();
+      renderTodos();
+    }
+
+    function setTodoFilter(filter) {
+      state.todoFilter = filter;
+      ['all', 'active', 'completed'].forEach(f => {
+        const btn = document.getElementById(`todoFilter-${f}`);
+        if (f === filter) {
+          btn.className = 'px-3 py-1 rounded-lg bg-white text-slate-900 shadow-2xs font-semibold';
+        } else {
+          btn.className = 'px-3 py-1 rounded-lg hover:text-slate-900';
+        }
+      });
+      renderTodos();
+    }
+
+    function clearCompletedTodos() {
+      state.todos = state.todos.filter(t => !t.completed);
+      saveState();
+      renderTodos();
+    }
+
+    function renderTodos() {
+      const listEl = document.getElementById('todoList');
+      const emptyEl = document.getElementById('emptyTodoList');
+      
+      let filtered = state.todos;
+      if (state.todoFilter === 'active') filtered = state.todos.filter(t => !t.completed);
+      if (state.todoFilter === 'completed') filtered = state.todos.filter(t => t.completed);
+
+      // Progress calculate
+      const total = state.todos.length;
+      const completedCount = state.todos.filter(t => t.completed).length;
+      const pct = total === 0 ? 0 : Math.round((completedCount / total) * 100);
+      document.getElementById('todoProgressText').textContent = `完成度：${completedCount}/${total} (${pct}%)`;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+
+      const priorityBadge = {
+        high: '<span class="text-xs px-2 py-0.5 rounded-md bg-red-50 text-red-600 font-medium">🔥 重要</span>',
+        normal: '<span class="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium">一般</span>',
+        low: '<span class="text-xs px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 font-medium">🌱 低</span>'
+      };
+
+      listEl.innerHTML = filtered.map(item => `
+        <div class="group bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/70 hover:border-slate-300 transition-all flex items-center justify-between gap-3 shadow-2xs ${item.completed ? 'opacity-60 bg-slate-50/60' : ''}">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <button onclick="toggleTodo(${item.id})" class="w-6 h-6 rounded-lg flex items-center justify-center transition border ${item.completed ? 'bg-slate-900 border-slate-900 text-white' : 'border-slate-300 hover:border-slate-400 text-transparent'}">
+              <i class="ph-bold ph-check text-xs"></i>
+            </button>
+            <span class="text-sm truncate select-none ${item.completed ? 'line-through text-slate-400' : 'text-slate-800 font-medium'}">
+              ${escapeHtml(item.text)}
+            </span>
+            ${priorityBadge[item.priority] || ''}
+          </div>
+          <button onclick="deleteTodo(${item.id})" class="opacity-40 group-hover:opacity-100 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition text-slate-400">
+            <i class="ph-bold ph-trash text-base"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    const colorStyles = {
+      yellow: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-950', badge: 'bg-amber-200/70' },
+      green: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-950', badge: 'bg-emerald-200/70' },
+      blue: { bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-950', badge: 'bg-sky-200/70' },
+      rose: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-950', badge: 'bg-rose-200/70' },
+      purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-950', badge: 'bg-purple-200/70' }
+    };
+
+    function openNoteModal(editId = null) {
+      const modal = document.getElementById('noteModal');
+      const editInput = document.getElementById('editNoteId');
+      const titleInput = document.getElementById('noteTitleInput');
+      const contentInput = document.getElementById('noteContentInput');
+      const modalTitle = document.getElementById('noteModalTitle');
+
+      if (editId) {
+        const target = state.notes.find(n => n.id === editId);
+        if (target) {
+          editInput.value = target.id;
+          titleInput.value = target.title || '';
+          contentInput.value = target.content;
+          modalTitle.textContent = '編輯便條紙';
+          const radio = document.querySelector(`input[name="noteColor"][value="${target.color}"]`);
+          if (radio) radio.checked = true;
+        }
+      } else {
+        editInput.value = '';
+        titleInput.value = '';
+        contentInput.value = '';
+        modalTitle.textContent = '新增便條紙';
+        document.querySelector('input[name="noteColor"][value="yellow"]').checked = true;
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closeNoteModal() {
+      document.getElementById('noteModal').classList.add('hidden');
+    }
+
+    function saveNote(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editNoteId').value;
+      const title = document.getElementById('noteTitleInput').value.trim();
+      const content = document.getElementById('noteContentInput').value.trim();
+      const color = document.querySelector('input[name="noteColor"]:checked').value;
+      const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (!content) return;
+
+      if (editId) {
+        state.notes = state.notes.map(n => n.id === Number(editId) ? {
+          ...n,
+          title: title,
+          content: content,
+          color: color,
+          updatedAt: `編輯於 ${nowStr}`
+        } : n);
+      } else {
+        state.notes.unshift({
+          id: Date.now(),
+          title: title,
+          content: content,
+          color: color,
+          updatedAt: `建立於 ${nowStr}`
+        });
+      }
+
+      saveState();
+      closeNoteModal();
+      renderNotes();
+    }
+
+    function deleteNote(id) {
+      state.notes = state.notes.filter(n => n.id !== id);
+      saveState();
+      renderNotes();
+    }
+
+    function renderNotes() {
+      const grid = document.getElementById('notesGrid');
+      const emptyEl = document.getElementById('emptyNotesList');
+
+      if (state.notes.length === 0) {
+        grid.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+
+      grid.innerHTML = state.notes.map(note => {
+        const c = colorStyles[note.color] || colorStyles.yellow;
+        return `
+          <div class="group relative ${c.bg} ${c.border} border rounded-2xl p-4.5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between min-h-[170px]">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <h4 class="font-bold text-sm ${c.text} line-clamp-1">${escapeHtml(note.title) || '無標題便條'}</h4>
+                <div class="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition">
+                  <button onclick="openNoteModal(${note.id})" class="p-1 hover:bg-black/5 rounded text-slate-700">
+                    <i class="ph-bold ph-pencil-simple text-sm"></i>
+                  </button>
+                  <button onclick="deleteNote(${note.id})" class="p-1 hover:bg-black/5 rounded text-slate-700 hover:text-red-600">
+                    <i class="ph-bold ph-trash text-sm"></i>
+                  </button>
+                </div>
+              </div>
+              <p class="text-xs ${c.text} whitespace-pre-wrap leading-relaxed opacity-90">${escapeHtml(note.content)}</p>
+            </div>
+            <div class="mt-4 pt-2.5 border-t border-black/5 flex items-center justify-between text-[11px] opacity-60 ${c.text}">
+              <span>${note.updatedAt}</span>
+              <span class="w-2 h-2 rounded-full ${c.badge}"></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addScheduleItem(e) {
+      e.preventDefault();
+      const title = document.getElementById('scheduleTitle').value.trim();
+      const date = document.getElementById('scheduleDate').value;
+      const time = document.getElementById('scheduleTime').value;
+
+      if (!title || !date || !time) return;
+
+      state.schedule.push({
+        id: Date.now(),
+        title: title,
+        date: date,
+        time: time
+      });
+
+      // Sort by date and time ascending
+      state.schedule.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+
+      document.getElementById('scheduleTitle').value = '';
+      saveState();
+      renderSchedule();
+    }
+
+    function deleteSchedule(id) {
+      state.schedule = state.schedule.filter(s => s.id !== id);
+      saveState();
+      renderSchedule();
+    }
+
+    function renderSchedule() {
+      const list = document.getElementById('scheduleList');
+      const emptyEl = document.getElementById('emptyScheduleList');
+
+      if (state.schedule.length === 0) {
+        list.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+
+      // Group schedule items by date
+      list.innerHTML = state.schedule.map(item => {
+        const itemDate = new Date(`${item.date}T00:00:00`);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const isPast = new Date(`${item.date}T${item.time}`) < new Date();
+
+        return `
+          <div class="group bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 transition-all flex items-center justify-between gap-4 shadow-2xs ${isPast ? 'opacity-60 bg-slate-50/50' : ''}">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-xl bg-slate-100 flex flex-col items-center justify-center border border-slate-200/60 shrink-0">
+                <span class="text-[10px] font-bold text-slate-500 uppercase">${itemDate.toLocaleString('en', { month: 'short' })}</span>
+                <span class="text-base font-bold text-slate-900 leading-none">${itemDate.getDate()}</span>
+              </div>
+              <div>
+                <h4 class="font-semibold text-slate-900 text-sm leading-snug ${isPast ? 'line-through text-slate-400' : ''}">
+                  ${escapeHtml(item.title)}
+                </h4>
+                <div class="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                  <span class="flex items-center gap-1">
+                    <i class="ph ph-clock"></i>
+                    <span>${item.time}</span>
+                  </span>
+                  <span>·</span>
+                  <span>${item.date}</span>
+                  ${isPast ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-200/60 text-slate-500">已過期</span>' : ''}
+                </div>
+              </div>
+            </div>
+            <button onclick="deleteSchedule(${item.id})" class="opacity-40 group-hover:opacity-100 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition text-slate-400">
+              <i class="ph-bold ph-trash text-base"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Badge updates
+    function updateBadges() {
+      const activeTodos = state.todos.filter(t => !t.completed).length;
+      document.getElementById('badge-todo-count').textContent = activeTodos;
+      document.getElementById('badge-notes-count').textContent = state.notes.length;
+      document.getElementById('badge-schedule-count').textContent = state.schedule.length;
+    }
+
+    // Helper
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
+    // Initialize application
+    window.onload = function() {
+      // Set default schedule date to today
+      const today = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('scheduleDate');
+      if (dateInput) dateInput.value = today;
+
+      renderTodos();
+      renderNotes();
+      renderSchedule();
+      updateBadges();
+    };
+  </script>
+</body>
+</html>
