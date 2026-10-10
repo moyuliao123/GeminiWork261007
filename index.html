@@ -1,10 +1,10 @@
-html
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>極簡工作台 - 待辦・便條紙・日程表</title>
+  <title>極簡工作台 - 待辦・便條紙・日程表・週課表</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Phosphor Icons for modern minimalist UI icons -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -13,7 +13,6 @@ html
     body {
       font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    /* Custom scrollbar for sticky notes and schedules */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -32,6 +31,7 @@ html
 </head>
 <body class="bg-[#F8F9FA] text-slate-800 antialiased min-h-screen flex flex-col">
 
+  <!-- Header -->
   <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200/80 shadow-xs">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -40,26 +40,31 @@ html
         </div>
         <div>
           <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">極簡工作台</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">待辦事項 · 便條紙 · 日程表</p>
+          <p class="text-xs text-slate-500 hidden sm:block">待辦 · 便條 · 日程 · 視覺化課表</p>
         </div>
       </div>
 
-      <!-- Navigation Segment Tabs -->
-      <nav class="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/60" id="tabContainer">
-        <button onclick="switchTab('todos')" id="tabBtn-todos" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs">
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/60 overflow-x-auto" id="tabContainer">
+        <button onclick="switchTab('todos')" id="tabBtn-todos" class="tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs whitespace-nowrap">
           <i class="ph-bold ph-check-circle text-base"></i>
           <span>待辦</span>
           <span id="badge-todo-count" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600 font-normal">0</span>
         </button>
-        <button onclick="switchTab('notes')" id="tabBtn-notes" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+        <button onclick="switchTab('notes')" id="tabBtn-notes" class="tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap">
           <i class="ph-bold ph-note text-base"></i>
           <span>便條紙</span>
           <span id="badge-notes-count" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-200/60 text-slate-600 font-normal">0</span>
         </button>
-        <button onclick="switchTab('schedule')" id="tabBtn-schedule" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+        <button onclick="switchTab('schedule')" id="tabBtn-schedule" class="tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap">
           <i class="ph-bold ph-calendar text-base"></i>
           <span>日程表</span>
           <span id="badge-schedule-count" class="text-xs px-1.5 py-0.2 rounded-full bg-slate-200/60 text-slate-600 font-normal">0</span>
+        </button>
+        <button onclick="switchTab('timetable')" id="tabBtn-timetable" class="tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap">
+          <i class="ph-bold ph-table text-base"></i>
+          <span>可視化課表</span>
+          <span id="badge-timetable-count" class="text-xs px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-700 font-normal">0</span>
         </button>
       </nav>
     </div>
@@ -67,9 +72,8 @@ html
 
   <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
     
-    <!-- ==================== 1. 待辦事項 (Todos View) ==================== -->
+    <!-- ==================== 1. 待辦事項 (Todos) ==================== -->
     <section id="view-todos" class="space-y-6">
-      <!-- Input bar -->
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <form id="todoForm" onsubmit="addTodo(event)" class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
@@ -91,7 +95,6 @@ html
         </form>
       </div>
 
-      <!-- Filters & Stats -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-medium text-slate-600">
           <button onclick="setTodoFilter('all')" id="todoFilter-all" class="px-3 py-1 rounded-lg bg-white text-slate-900 shadow-2xs font-semibold">全部</button>
@@ -107,10 +110,7 @@ html
         </div>
       </div>
 
-      <!-- Todo List -->
-      <div id="todoList" class="space-y-2.5">
-        <!-- Javascript dynamically injects todos here -->
-      </div>
+      <div id="todoList" class="space-y-2.5"></div>
       
       <div id="emptyTodoList" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
         <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
@@ -121,9 +121,8 @@ html
       </div>
     </section>
 
-    <!-- ==================== 2. 便條紙 (Sticky Notes View) ==================== -->
+    <!-- ==================== 2. 便條紙 (Sticky Notes) ==================== -->
     <section id="view-notes" class="hidden space-y-6">
-      <!-- Create Note Trigger bar -->
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="font-bold text-slate-800 text-sm sm:text-base">靈感與隨手筆記</h2>
@@ -135,10 +134,7 @@ html
         </button>
       </div>
 
-      <!-- Notes Grid -->
-      <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Javascript dynamically injects notes here -->
-      </div>
+      <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
       <div id="emptyNotesList" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
         <div class="w-12 h-12 mx-auto rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
@@ -149,9 +145,8 @@ html
       </div>
     </section>
 
-    <!-- ==================== 3. 日程表 (Schedule View) ==================== -->
+    <!-- ==================== 3. 日程表 (Schedule) ==================== -->
     <section id="view-schedule" class="hidden space-y-6">
-      <!-- Add Schedule Event -->
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <form id="scheduleForm" onsubmit="addScheduleItem(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
           <div class="sm:col-span-4">
@@ -178,7 +173,6 @@ html
         </form>
       </div>
 
-      <!-- Schedule Filter by Date -->
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
           <i class="ph-bold ph-clock text-slate-500"></i>
@@ -187,10 +181,7 @@ html
         <span class="text-xs text-slate-400">依日期與時間排序</span>
       </div>
 
-      <!-- Schedule Event Timeline Cards -->
-      <div id="scheduleList" class="space-y-3">
-        <!-- Javascript dynamically injects schedule cards here -->
-      </div>
+      <div id="scheduleList" class="space-y-3"></div>
 
       <div id="emptyScheduleList" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
         <div class="w-12 h-12 mx-auto rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-3">
@@ -201,9 +192,73 @@ html
       </div>
     </section>
 
+    <!-- ==================== 4. 可視化時間表 + 週課表 (Timetable) ==================== -->
+    <section id="view-timetable" class="hidden space-y-6">
+      
+      <!-- Top Actions & Today Summary -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-bold text-slate-900 text-base sm:text-lg">每週課表與作息時間軸</h2>
+            <span id="todayDayBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60"></span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">點擊課表格子或下方按鈕，即可排定或編輯每週固定課程與時程</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openCourseModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white rounded-xl text-sm font-medium transition shadow-xs flex items-center gap-1.5 whitespace-nowrap">
+            <i class="ph-bold ph-plus-circle text-base"></i>
+            <span>排入新課程</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Today's Visual Timeline Section -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <i class="ph-bold ph-hourglass-high text-indigo-600 text-lg"></i>
+            <h3 class="font-bold text-slate-800 text-sm">今日視覺化時間軸（日程 & 課表）</h3>
+          </div>
+          <span class="text-xs text-slate-400" id="currentDateDisplay"></span>
+        </div>
+        <!-- Timeline Render Container -->
+        <div id="todayTimeline" class="space-y-3"></div>
+      </div>
+
+      <!-- Weekly Timetable Grid Table -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+          <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+            <i class="ph-bold ph-calendar-blank text-slate-500"></i>
+            <span>全週課表矩陣（週一至週五）</span>
+          </h3>
+          <span class="text-xs text-slate-400">點選課表格子可直接新增或修改</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-left text-xs sm:text-sm min-w-[700px]">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200/80 text-center">
+                <th class="py-3 px-3 w-28 border-r border-slate-200/60">節次 / 時間</th>
+                <th class="py-3 px-3 w-[18%] border-r border-slate-200/60" id="col-day-1">週一 (Mon)</th>
+                <th class="py-3 px-3 w-[18%] border-r border-slate-200/60" id="col-day-2">週二 (Tue)</th>
+                <th class="py-3 px-3 w-[18%] border-r border-slate-200/60" id="col-day-3">週三 (Wed)</th>
+                <th class="py-3 px-3 w-[18%] border-r border-slate-200/60" id="col-day-4">週四 (Thu)</th>
+                <th class="py-3 px-3 w-[18%]" id="col-day-5">週五 (Fri)</th>
+              </tr>
+            </thead>
+            <tbody id="timetableGridBody" class="divide-y divide-slate-100">
+              <!-- Dynamically populated periods 1 to 8 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
   </main>
 
-  <!-- Note Creation / Edit Modal -->
+  <!-- Note Modal -->
   <div id="noteModal" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl border border-slate-100 transition-all">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -257,8 +312,124 @@ html
     </div>
   </div>
 
+  <!-- Course Add / Edit Modal -->
+  <div id="courseModal" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl border border-slate-100 transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 id="courseModalTitle" class="font-bold text-slate-900 text-base">新增課程節次</h3>
+        <button onclick="closeCourseModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center">
+          <i class="ph-bold ph-x text-lg"></i>
+        </button>
+      </div>
+      <form id="courseForm" onsubmit="saveCourse(event)" class="mt-4 space-y-4">
+        <input type="hidden" id="editCourseId" value="">
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">課程名稱</label>
+          <input type="text" id="courseNameInput" required placeholder="例如：作業系統、計算機網路"
+                 class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">星期</label>
+            <select id="courseDayInput" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 bg-white">
+              <option value="1">星期一</option>
+              <option value="2">星期二</option>
+              <option value="3">星期三</option>
+              <option value="4">星期四</option>
+              <option value="5">星期五</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">節次</label>
+            <select id="coursePeriodInput" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 bg-white">
+              <option value="1">第 1 節 (08:10 - 09:00)</option>
+              <option value="2">第 2 節 (09:10 - 10:00)</option>
+              <option value="3">第 3 節 (10:10 - 11:00)</option>
+              <option value="4">第 4 節 (11:10 - 12:00)</option>
+              <option value="5">第 5 節 (13:10 - 14:00)</option>
+              <option value="6">第 6 節 (14:10 - 15:00)</option>
+              <option value="7">第 7 節 (15:10 - 16:00)</option>
+              <option value="8">第 8 節 (16:10 - 17:00)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">教室 / 地點</label>
+            <input type="text" id="courseRoomInput" placeholder="例如：電資館 302"
+                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">教師 / 備註</label>
+            <input type="text" id="courseTeacherInput" placeholder="例如：王教授"
+                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">課程卡片配色</label>
+          <div class="flex items-center gap-3">
+            <label class="cursor-pointer">
+              <input type="radio" name="courseColor" value="indigo" checked class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-indigo-200 ring-2 ring-transparent peer-checked:ring-indigo-800 peer-checked:scale-110 transition"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="courseColor" value="sky" class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-sky-200 ring-2 ring-transparent peer-checked:ring-sky-800 peer-checked:scale-110 transition"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="courseColor" value="emerald" class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-emerald-200 ring-2 ring-transparent peer-checked:ring-emerald-800 peer-checked:scale-110 transition"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="courseColor" value="amber" class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-amber-200 ring-2 ring-transparent peer-checked:ring-amber-800 peer-checked:scale-110 transition"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="courseColor" value="purple" class="peer sr-only">
+              <div class="w-7 h-7 rounded-full bg-purple-200 ring-2 ring-transparent peer-checked:ring-purple-800 peer-checked:scale-110 transition"></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" id="deleteCourseBtn" onclick="deleteCurrentCourse()" class="hidden px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-medium transition">
+            刪除此課
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" onclick="closeCourseModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50">取消</button>
+            <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-medium">確認儲存</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
-    // State initialization from localStorage or defaults
+    // Period definition mapping
+    const PERIODS = [
+      { id: 1, name: '第 1 節', start: '08:10', end: '09:00' },
+      { id: 2, name: '第 2 節', start: '09:10', end: '10:00' },
+      { id: 3, name: '第 3 節', start: '10:10', end: '11:00' },
+      { id: 4, name: '第 4 節', start: '11:10', end: '12:00' },
+      { id: 5, name: '第 5 節', start: '13:10', end: '14:00' },
+      { id: 6, name: '第 6 節', start: '14:10', end: '15:00' },
+      { id: 7, name: '第 7 節', start: '15:10', end: '16:00' },
+      { id: 8, name: '第 8 節', start: '16:10', end: '17:00' }
+    ];
+
+    const courseColorThemes = {
+      indigo: { bg: 'bg-indigo-50 hover:bg-indigo-100/80', border: 'border-indigo-200', text: 'text-indigo-950', badge: 'bg-indigo-200/60 text-indigo-700' },
+      sky: { bg: 'bg-sky-50 hover:bg-sky-100/80', border: 'border-sky-200', text: 'text-sky-950', badge: 'bg-sky-200/60 text-sky-700' },
+      emerald: { bg: 'bg-emerald-50 hover:bg-emerald-100/80', border: 'border-emerald-200', text: 'text-emerald-950', badge: 'bg-emerald-200/60 text-emerald-700' },
+      amber: { bg: 'bg-amber-50 hover:bg-amber-100/80', border: 'border-amber-200', text: 'text-amber-950', badge: 'bg-amber-200/60 text-amber-700' },
+      purple: { bg: 'bg-purple-50 hover:bg-purple-100/80', border: 'border-purple-200', text: 'text-purple-950', badge: 'bg-purple-200/60 text-purple-700' }
+    };
+
+    // State initialization
     let state = {
       currentTab: 'todos',
       todoFilter: 'all',
@@ -275,35 +446,49 @@ html
         { id: 1, title: '電科專題小組週會', date: '2026-10-07', time: '14:30' },
         { id: 2, title: '機器學習作業截止', date: '2026-10-09', time: '23:59' },
         { id: 3, title: '期中線上研討會', date: '2026-10-12', time: '10:00' }
+      ],
+      courses: JSON.parse(localStorage.getItem('minimal_app_courses')) || [
+        { id: 101, name: '高等演算法', day: 1, period: 2, room: '資工館 101', teacher: '陳教授', color: 'indigo' },
+        { id: 102, name: '高等演算法', day: 1, period: 3, room: '資工館 101', teacher: '陳教授', color: 'indigo' },
+        { id: 103, name: '分散式系統', day: 2, period: 5, room: '電資 402', teacher: '李教授', color: 'sky' },
+        { id: 104, name: '深度學習理論', day: 3, period: 6, room: '科教館 204', teacher: '張副教授', color: 'purple' },
+        { id: 105, name: '深度學習理論', day: 3, period: 7, room: '科教館 204', teacher: '張副教授', color: 'purple' },
+        { id: 106, name: '軟體工程專案', day: 4, period: 3, room: '創客教室', teacher: '林講師', color: 'emerald' },
+        { id: 107, name: '日語初級會話', day: 5, period: 2, room: '文學院 108', teacher: '佐藤老師', color: 'amber' }
       ]
     };
 
-    // Save helper
     function saveState() {
       localStorage.setItem('minimal_app_todos', JSON.stringify(state.todos));
       localStorage.setItem('minimal_app_notes', JSON.stringify(state.notes));
       localStorage.setItem('minimal_app_schedule', JSON.stringify(state.schedule));
+      localStorage.setItem('minimal_app_courses', JSON.stringify(state.courses));
       updateBadges();
     }
 
-    // Tab switcher
     function switchTab(tabId) {
       state.currentTab = tabId;
-      const tabs = ['todos', 'notes', 'schedule'];
+      const tabs = ['todos', 'notes', 'schedule', 'timetable'];
       
       tabs.forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const btn = document.getElementById(`tabBtn-${t}`);
         if (t === tabId) {
           view.classList.remove('hidden');
-          btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs';
+          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs whitespace-nowrap';
         } else {
           view.classList.add('hidden');
-          btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap';
         }
       });
+
+      if (tabId === 'timetable') {
+        renderTimetable();
+        renderTodayTimeline();
+      }
     }
 
+    /* ================= 待辦事項邏輯 ================= */
     function addTodo(e) {
       e.preventDefault();
       const input = document.getElementById('todoInput');
@@ -363,7 +548,6 @@ html
       if (state.todoFilter === 'active') filtered = state.todos.filter(t => !t.completed);
       if (state.todoFilter === 'completed') filtered = state.todos.filter(t => t.completed);
 
-      // Progress calculate
       const total = state.todos.length;
       const completedCount = state.todos.filter(t => t.completed).length;
       const pct = total === 0 ? 0 : Math.round((completedCount / total) * 100);
@@ -400,7 +584,8 @@ html
       `).join('');
     }
 
-    const colorStyles = {
+    /* ================= 便條紙邏輯 ================= */
+    const noteColorStyles = {
       yellow: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-950', badge: 'bg-amber-200/70' },
       green: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-950', badge: 'bg-emerald-200/70' },
       blue: { bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-950', badge: 'bg-sky-200/70' },
@@ -490,7 +675,7 @@ html
       emptyEl.classList.add('hidden');
 
       grid.innerHTML = state.notes.map(note => {
-        const c = colorStyles[note.color] || colorStyles.yellow;
+        const c = noteColorStyles[note.color] || noteColorStyles.yellow;
         return `
           <div class="group relative ${c.bg} ${c.border} border rounded-2xl p-4.5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between min-h-[170px]">
             <div>
@@ -516,6 +701,7 @@ html
       }).join('');
     }
 
+    /* ================= 日程表邏輯 ================= */
     function addScheduleItem(e) {
       e.preventDefault();
       const title = document.getElementById('scheduleTitle').value.trim();
@@ -531,18 +717,18 @@ html
         time: time
       });
 
-      // Sort by date and time ascending
       state.schedule.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
-
       document.getElementById('scheduleTitle').value = '';
       saveState();
       renderSchedule();
+      renderTodayTimeline();
     }
 
     function deleteSchedule(id) {
       state.schedule = state.schedule.filter(s => s.id !== id);
       saveState();
       renderSchedule();
+      renderTodayTimeline();
     }
 
     function renderSchedule() {
@@ -556,11 +742,8 @@ html
       }
       emptyEl.classList.add('hidden');
 
-      // Group schedule items by date
       list.innerHTML = state.schedule.map(item => {
         const itemDate = new Date(`${item.date}T00:00:00`);
-        const today = new Date();
-        today.setHours(0,0,0,0);
         const isPast = new Date(`${item.date}T${item.time}`) < new Date();
 
         return `
@@ -593,15 +776,252 @@ html
       }).join('');
     }
 
+    /* ================= 可視化課表與時間軸邏輯 ================= */
+    function openCourseModal(day = 1, period = 1, courseId = null) {
+      const modal = document.getElementById('courseModal');
+      const editIdInput = document.getElementById('editCourseId');
+      const nameInput = document.getElementById('courseNameInput');
+      const dayInput = document.getElementById('courseDayInput');
+      const periodInput = document.getElementById('coursePeriodInput');
+      const roomInput = document.getElementById('courseRoomInput');
+      const teacherInput = document.getElementById('courseTeacherInput');
+      const titleEl = document.getElementById('courseModalTitle');
+      const delBtn = document.getElementById('deleteCourseBtn');
+
+      if (courseId) {
+        const item = state.courses.find(c => c.id === courseId);
+        if (item) {
+          editIdInput.value = item.id;
+          nameInput.value = item.name;
+          dayInput.value = item.day;
+          periodInput.value = item.period;
+          roomInput.value = item.room || '';
+          teacherInput.value = item.teacher || '';
+          titleEl.textContent = '編輯課程';
+          delBtn.classList.remove('hidden');
+          const radio = document.querySelector(`input[name="courseColor"][value="${item.color}"]`);
+          if (radio) radio.checked = true;
+        }
+      } else {
+        editIdInput.value = '';
+        nameInput.value = '';
+        dayInput.value = day;
+        periodInput.value = period;
+        roomInput.value = '';
+        teacherInput.value = '';
+        titleEl.textContent = '新增課程節次';
+        delBtn.classList.add('hidden');
+        document.querySelector('input[name="courseColor"][value="indigo"]').checked = true;
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closeCourseModal() {
+      document.getElementById('courseModal').classList.add('hidden');
+    }
+
+    function saveCourse(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editCourseId').value;
+      const name = document.getElementById('courseNameInput').value.trim();
+      const day = parseInt(document.getElementById('courseDayInput').value, 10);
+      const period = parseInt(document.getElementById('coursePeriodInput').value, 10);
+      const room = document.getElementById('courseRoomInput').value.trim();
+      const teacher = document.getElementById('courseTeacherInput').value.trim();
+      const color = document.querySelector('input[name="courseColor"]:checked').value;
+
+      if (!name) return;
+
+      if (editId) {
+        state.courses = state.courses.map(c => c.id === Number(editId) ? {
+          ...c, name, day, period, room, teacher, color
+        } : c);
+      } else {
+        // Check if there is already a course in this slot, replace if exists
+        state.courses = state.courses.filter(c => !(c.day === day && c.period === period));
+        state.courses.push({
+          id: Date.now(),
+          name, day, period, room, teacher, color
+        });
+      }
+
+      saveState();
+      closeCourseModal();
+      renderTimetable();
+      renderTodayTimeline();
+    }
+
+    function deleteCurrentCourse() {
+      const editId = document.getElementById('editCourseId').value;
+      if (editId) {
+        state.courses = state.courses.filter(c => c.id !== Number(editId));
+        saveState();
+        closeCourseModal();
+        renderTimetable();
+        renderTodayTimeline();
+      }
+    }
+
+    function renderTimetable() {
+      const tbody = document.getElementById('timetableGridBody');
+      const todayDay = new Date().getDay(); // 0 is Sun, 1 is Mon...
+
+      // Highlight today column header
+      for (let d = 1; d <= 5; d++) {
+        const th = document.getElementById(`col-day-${d}`);
+        if (th) {
+          if (todayDay === d) {
+            th.className = 'py-3 px-3 w-[18%] bg-indigo-50/80 text-indigo-700 font-bold border-b border-indigo-200';
+          } else {
+            th.className = 'py-3 px-3 w-[18%] text-slate-600 font-semibold border-r border-slate-200/60';
+          }
+        }
+      }
+
+      let rowsHtml = '';
+      PERIODS.forEach(p => {
+        rowsHtml += `
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="p-2 sm:p-3 text-center border-r border-slate-200/60 bg-slate-50/40">
+              <span class="font-bold text-slate-800 block text-xs">${p.name}</span>
+              <span class="text-[10px] text-slate-400 block">${p.start} - ${p.end}</span>
+            </td>
+        `;
+
+        // Render Monday to Friday (1..5)
+        for (let d = 1; d <= 5; d++) {
+          const course = state.courses.find(c => c.day === d && c.period === p.id);
+          const isTodayCol = todayDay === d;
+
+          if (course) {
+            const theme = courseColorThemes[course.color] || courseColorThemes.indigo;
+            rowsHtml += `
+              <td class="p-1 sm:p-1.5 border-r border-slate-100 ${isTodayCol ? 'bg-indigo-50/20' : ''}">
+                <div onclick="openCourseModal(${d}, ${p.id}, ${course.id})"
+                     class="${theme.bg} ${theme.border} ${theme.text} border rounded-xl p-2 cursor-pointer shadow-2xs transition-all hover:scale-[1.02] flex flex-col justify-between min-h-[74px]">
+                  <div>
+                    <div class="font-bold text-xs truncate leading-snug">${escapeHtml(course.name)}</div>
+                    ${course.room ? `<div class="text-[11px] opacity-80 flex items-center gap-1 mt-0.5"><i class="ph ph-map-pin"></i><span class="truncate">${escapeHtml(course.room)}</span></div>` : ''}
+                  </div>
+                  ${course.teacher ? `<div class="text-[10px] font-medium opacity-65 truncate mt-1">${escapeHtml(course.teacher)}</div>` : ''}
+                </div>
+              </td>
+            `;
+          } else {
+            rowsHtml += `
+              <td class="p-1 sm:p-1.5 border-r border-slate-100 ${isTodayCol ? 'bg-indigo-50/20' : ''}">
+                <div onclick="openCourseModal(${d}, ${p.id})"
+                     class="h-[74px] rounded-xl border border-dashed border-slate-200/80 hover:border-indigo-300 hover:bg-indigo-50/30 transition flex items-center justify-center cursor-pointer group">
+                  <span class="text-xs text-slate-300 group-hover:text-indigo-500 font-medium flex items-center gap-1">
+                    <i class="ph-bold ph-plus text-xs"></i>
+                    <span class="text-[11px]">排課</span>
+                  </span>
+                </div>
+              </td>
+            `;
+          }
+        }
+
+        rowsHtml += `</tr>`;
+      });
+
+      tbody.innerHTML = rowsHtml;
+    }
+
+    function renderTodayTimeline() {
+      const container = document.getElementById('todayTimeline');
+      const now = new Date();
+      const todayDay = now.getDay(); // 0: Sun, 1: Mon...
+      const todayDateStr = now.toISOString().split('T')[0];
+
+      // Update Header date label
+      const daysMap = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      document.getElementById('todayDayBadge').textContent = `今天是 ${daysMap[todayDay]}`;
+      document.getElementById('currentDateDisplay').textContent = `${todayDateStr} (${daysMap[todayDay]})`;
+
+      // 1. Gather today's courses
+      const todayCourses = state.courses
+        .filter(c => c.day === todayDay)
+        .map(c => {
+          const periodInfo = PERIODS.find(p => p.id === c.period);
+          return {
+            type: 'course',
+            id: c.id,
+            title: c.name,
+            sub: `${c.room ? c.room + ' · ' : ''}${c.teacher || '課程節次'}`,
+            time: periodInfo ? periodInfo.start : '00:00',
+            endTime: periodInfo ? periodInfo.end : '00:00',
+            color: c.color
+          };
+        });
+
+      // 2. Gather today's schedules
+      const todaySchedules = state.schedule
+        .filter(s => s.date === todayDateStr)
+        .map(s => ({
+          type: 'schedule',
+          id: s.id,
+          title: s.title,
+          sub: '日程安排',
+          time: s.time,
+          endTime: '',
+          color: 'slate'
+        }));
+
+      // Merge and sort
+      const mergedEvents = [...todayCourses, ...todaySchedules].sort((a, b) => a.time.localeCompare(b.time));
+
+      if (mergedEvents.length === 0) {
+        container.innerHTML = `
+          <div class="py-8 text-center text-slate-400">
+            <i class="ph-bold ph-coffee text-2xl mb-1 text-slate-300"></i>
+            <p class="text-xs">今天沒有排定的課程或日程安排，享受充實的一天！</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = mergedEvents.map((evt, idx) => {
+        const isCourse = evt.type === 'course';
+        const badgeColor = isCourse ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-white';
+
+        return `
+          <div class="relative pl-6 sm:pl-8 group">
+            <!-- Timeline vertical line -->
+            ${idx !== mergedEvents.length - 1 ? '<div class="absolute left-2.5 sm:left-3 top-6 bottom-0 w-0.5 bg-slate-200"></div>' : ''}
+            
+            <!-- Timeline Dot indicator -->
+            <div class="absolute left-1 sm:left-1.5 top-2 w-3.5 h-3.5 rounded-full border-2 border-white ${isCourse ? 'bg-indigo-500' : 'bg-slate-700'} shadow-xs"></div>
+
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 sm:p-3.5 hover:border-slate-300 transition flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-bold font-mono px-2 py-1 rounded-lg ${badgeColor}">
+                  ${evt.time} ${evt.endTime ? `- ${evt.endTime}` : ''}
+                </span>
+                <div>
+                  <h4 class="font-bold text-slate-900 text-sm">${escapeHtml(evt.title)}</h4>
+                  <p class="text-xs text-slate-500">${escapeHtml(evt.sub)}</p>
+                </div>
+              </div>
+              <span class="text-[11px] px-2 py-0.5 rounded-md ${isCourse ? 'bg-indigo-100 text-indigo-700 font-medium' : 'bg-slate-200 text-slate-600'}">
+                ${isCourse ? '學校課程' : '日程待辦'}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     // Badge updates
     function updateBadges() {
       const activeTodos = state.todos.filter(t => !t.completed).length;
       document.getElementById('badge-todo-count').textContent = activeTodos;
       document.getElementById('badge-notes-count').textContent = state.notes.length;
       document.getElementById('badge-schedule-count').textContent = state.schedule.length;
+      document.getElementById('badge-timetable-count').textContent = state.courses.length;
     }
 
-    // Helper
+    // XSS Escape helper
     function escapeHtml(str) {
       if (!str) return '';
       return str.replace(/[&<>"']/g, function(m) {
@@ -611,7 +1031,6 @@ html
 
     // Initialize application
     window.onload = function() {
-      // Set default schedule date to today
       const today = new Date().toISOString().split('T')[0];
       const dateInput = document.getElementById('scheduleDate');
       if (dateInput) dateInput.value = today;
@@ -619,6 +1038,8 @@ html
       renderTodos();
       renderNotes();
       renderSchedule();
+      renderTimetable();
+      renderTodayTimeline();
       updateBadges();
     };
   </script>
