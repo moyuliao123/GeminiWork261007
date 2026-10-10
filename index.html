@@ -302,40 +302,28 @@
       </div>
     </section>
 
-    <!-- ==================== 5. 課外小事 (Knowledge, Links & Analytics) ==================== -->
+    <!-- ==================== 5. 課外小事 (純手動記錄 + 閱讀狀態 + 進步圖表) ==================== -->
     <section id="view-knowledge" class="hidden space-y-6">
       
-      <!-- 匯入與分析輸入面板 -->
+      <!-- 輸入面板 -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <h2 class="font-bold text-slate-800 text-base">課外小事 · 知識與興趣紀錄</h2>
-            <p class="text-xs text-slate-500">匯入網路文章、書籍或影片連結，自動真實擷取網頁標題並劃分領域，追蹤自己每一份成長！</p>
+            <h2 class="font-bold text-slate-800 text-base">課外小事 · 閱讀與知識累積</h2>
+            <p class="text-xs text-slate-500">記錄各領域的書籍、筆記或學習小事，標記完成進度並追蹤成長！</p>
           </div>
         </div>
 
         <form id="knowledgeForm" onsubmit="addKnowledgeItem(event)" class="space-y-3.5">
-          <div class="flex flex-col sm:flex-row gap-3">
-            <div class="relative flex-1">
-              <i class="ph-bold ph-link absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-              <input type="url" id="knowLinkInput" required placeholder="貼上文章、書籍或影片連結 (例如：https://www.suncolor.com.tw/BookPage.aspx?bokno=107010101192)..."
-                     class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
-            </div>
-            <button type="button" id="parseLinkBtn" onclick="autoParseLink()" class="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-98">
-              <i class="ph-bold ph-magic-wand text-base text-amber-600"></i>
-              <span id="parseBtnText">連線擷取網頁真實標題</span>
-            </button>
-          </div>
-
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
             <div class="sm:col-span-5">
               <label class="block text-xs font-semibold text-slate-600 mb-1">小事標題 / 書名</label>
-              <input type="text" id="knowTitleInput" required placeholder="例如：福爾摩斯思考術、怪誕心理學..."
+              <input type="text" id="knowTitleInput" required placeholder="例如：福爾摩斯思考術、快思慢想、心理學專題..."
                      class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
             </div>
             <div class="sm:col-span-3">
-              <label class="block text-xs font-semibold text-slate-600 mb-1">領域類別 (可自訂或選取)</label>
-              <input type="text" id="knowCategoryInput" list="categoryOptions" required placeholder="例：推理小說、心理學"
+              <label class="block text-xs font-semibold text-slate-600 mb-1">領域類別 (可自訂)</label>
+              <input type="text" id="knowCategoryInput" list="categoryOptions" required placeholder="例如：推理小說、心理學"
                      class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
               <datalist id="categoryOptions">
                 <option value="推理小說"></option>
@@ -347,27 +335,36 @@
               </datalist>
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-semibold text-slate-600 mb-1">閱讀/研究時數 (hr)</label>
-              <input type="number" step="0.5" min="0.5" id="knowHoursInput" value="1.0" required
+              <label class="block text-xs font-semibold text-slate-600 mb-1">閱讀時長 (選填, hr)</label>
+              <input type="number" step="0.5" min="0" id="knowHoursInput" placeholder="選填 (如 1.5)"
                      class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
             </div>
-            <div class="sm:col-span-2 flex items-end">
-              <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-98 text-amber-950 font-bold rounded-xl text-sm transition shadow-xs flex items-center justify-center gap-1.5 whitespace-nowrap">
-                <i class="ph-bold ph-plus text-base"></i>
-                <span>記錄進步</span>
-              </button>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">閱讀進度狀態</label>
+              <select id="knowStatusInput" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 bg-white">
+                <option value="completed">🎉 已讀完</option>
+                <option value="half_or_more">📖 未讀完 (≥ 50%)</option>
+                <option value="less_than_half">🌱 未讀完 (< 50%)</option>
+              </select>
             </div>
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">心得與精華筆記（選填）</label>
-            <textarea id="knowNoteInput" rows="2" placeholder="記下最啟發你的一個思維模型、金句或解題邏輯..."
+            <textarea id="knowNoteInput" rows="2" placeholder="記下核心觀點、精彩名句或啟發..."
                       class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none"></textarea>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="submit" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-98 text-amber-950 font-bold rounded-xl text-sm transition shadow-xs flex items-center gap-1.5">
+              <i class="ph-bold ph-plus text-base"></i>
+              <span>記錄課外小事</span>
+            </button>
           </div>
         </form>
       </div>
 
-      <!-- 可視化進步圖表 (Analytics Dashboard) -->
+      <!-- 可視化進步圖表 -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- 左側：領域累積數據統計卡片 -->
@@ -375,37 +372,52 @@
           <div>
             <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
               <i class="ph-bold ph-chart-donut text-amber-500 text-base"></i>
-              <span>領域進步總覽</span>
+              <span>閱讀與學習狀態總覽</span>
             </h3>
-            <p class="text-xs text-slate-400 mt-1">累計投入知識時數與涵蓋主題數量</p>
             
             <div class="grid grid-cols-2 gap-3 my-4">
-              <div class="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200/60">
-                <span class="text-[11px] font-semibold text-amber-800">總累積時數</span>
-                <div class="text-2xl font-bold text-amber-950 mt-1" id="totalKnowHours">0 <span class="text-xs font-normal">小時</span></div>
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
+                <span class="text-[11px] font-semibold text-slate-600">完成/總篇數</span>
+                <div class="text-xl font-bold text-slate-800 mt-1" id="totalKnowCount">0/0 <span class="text-xs font-normal">篇</span></div>
               </div>
-              <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60">
-                <span class="text-[11px] font-semibold text-slate-600">完成主題小事</span>
-                <div class="text-2xl font-bold text-slate-800 mt-1" id="totalKnowCount">0 <span class="text-xs font-normal">篇</span></div>
+              <div class="p-3 bg-amber-50/70 rounded-xl border border-amber-200/60">
+                <span class="text-[11px] font-semibold text-amber-800">累計紀錄時數</span>
+                <div class="text-xl font-bold text-amber-950 mt-1" id="totalKnowHours">0 <span class="text-xs font-normal">小時</span></div>
+              </div>
+            </div>
+
+            <!-- 進度狀態分佈 -->
+            <div class="grid grid-cols-3 gap-1.5 p-2 bg-slate-50 rounded-xl text-center mb-4 text-[11px]">
+              <div>
+                <span class="text-emerald-700 font-semibold block">已讀完</span>
+                <span id="statCompletedCount" class="font-bold text-slate-800">0</span>
+              </div>
+              <div>
+                <span class="text-indigo-700 font-semibold block">≥ 50%</span>
+                <span id="statHalfOrMoreCount" class="font-bold text-slate-800">0</span>
+              </div>
+              <div>
+                <span class="text-amber-700 font-semibold block">< 50%</span>
+                <span id="statLessThanHalfCount" class="font-bold text-slate-800">0</span>
               </div>
             </div>
           </div>
 
           <!-- 類別佔比進度條 -->
           <div>
-            <div class="text-xs font-semibold text-slate-600 mb-2">各領域投入分佈比例</div>
+            <div class="text-xs font-semibold text-slate-600 mb-2">各領域小事數量分佈</div>
             <div id="knowCategoryProgressBars" class="space-y-2"></div>
           </div>
         </div>
 
-        <!-- 右側：SVG 可視化直方圖表 (Bar Chart) -->
+        <!-- 右側：可視化長條圖 -->
         <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
             <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
               <i class="ph-bold ph-chart-bar text-indigo-600 text-base"></i>
-              <span>領域成長柱狀圖（累積投入時數）</span>
+              <span>領域進步柱狀圖（各領域累積篇數）</span>
             </h3>
-            <span class="text-xs text-slate-400">數據隨小事即時更新</span>
+            <span class="text-xs text-slate-400">數據隨紀錄即時更新</span>
           </div>
           
           <div id="chartContainer" class="w-full flex items-end gap-3 sm:gap-6 h-52 pt-6 px-2 border-b border-slate-200">
@@ -419,9 +431,15 @@
         <div class="flex items-center justify-between">
           <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
             <i class="ph-bold ph-bookmarks text-slate-500"></i>
-            <span>課外探索紀錄列表</span>
+            <span>小事筆記列表</span>
           </h3>
           <div class="flex items-center gap-2">
+            <select id="filterStatusSelect" onchange="renderKnowledgeList()" class="px-2.5 py-1 text-xs rounded-lg border border-slate-200 bg-white text-slate-700">
+              <option value="all">所有狀態</option>
+              <option value="completed">已讀完</option>
+              <option value="half_or_more">≥ 50%</option>
+              <option value="less_than_half">< 50%</option>
+            </select>
             <select id="filterCategorySelect" onchange="renderKnowledgeList()" class="px-2.5 py-1 text-xs rounded-lg border border-slate-200 bg-white text-slate-700">
               <option value="all">所有領域分類</option>
             </select>
@@ -435,7 +453,7 @@
             <i class="ph-bold ph-lightbulb text-2xl"></i>
           </div>
           <p class="text-sm font-semibold text-slate-700">尚未記錄課外小事</p>
-          <p class="text-xs text-slate-400 mt-1">貼上感興趣的文章或書籍連結，開始點滴成長！</p>
+          <p class="text-xs text-slate-400 mt-1">輸入您最近閱讀的書籍或專題，開始記錄成長！</p>
         </div>
       </div>
 
@@ -635,33 +653,34 @@
       currentTab: 'todos',
       todoFilter: 'all',
       scheduleFilter: 'all',
-      todos: JSON.parse(localStorage.getItem('minimal_todos_v4')) || [
+      todos: JSON.parse(localStorage.getItem('minimal_todos_v5')) || [
         { id: 1, text: '微積分習題演練', priority: 'high', completed: false, createdAt: '2026-10-10' },
         { id: 2, text: '閱讀心理學新書章節', priority: 'normal', completed: true, createdAt: '2026-10-10' }
       ],
-      notes: JSON.parse(localStorage.getItem('minimal_notes_v4')) || [
+      notes: JSON.parse(localStorage.getItem('minimal_notes_v5')) || [
         { id: 1, title: '常用 Prompt 技巧', content: '1. 明確角色與目標\n2. 給予條列式範例 (Few-shot)\n3. 要求逐步思考 (Chain of Thought)', color: 'yellow', updatedAt: '今天 10:20' }
       ],
-      schedule: JSON.parse(localStorage.getItem('minimal_schedule_v4')) || [
+      schedule: JSON.parse(localStorage.getItem('minimal_schedule_v5')) || [
         { id: 1, title: '專案線上週會', isRecurring: true, recurringDays: [1], time: '10:00' },
         { id: 2, title: '核心健身鍛鍊', isRecurring: true, recurringDays: [3, 4, 5], time: '17:30' },
         { id: 3, title: '演算法小組討論', isRecurring: false, date: '2026-10-15', time: '14:00' }
       ],
-      courses: JSON.parse(localStorage.getItem('minimal_courses_v4')) || defaultInitialCourses,
-      knowledge: JSON.parse(localStorage.getItem('minimal_knowledge_v4')) || [
-        { id: 1, title: '福爾摩斯思考術：觀察與注意力的科學', category: '推理小說', url: 'https://example.com/holmes-deduction', hours: 2.5, note: '關鍵在於將細節與常規模型對照，不放過反常之處。', date: '2026-10-08' },
-        { id: 2, title: '怪誕行為學：非理性決策如何影響日常選擇', category: '心理學', url: 'https://example.com/irrational-psychology', hours: 3.0, note: '錨定效應無所不在，第一印象的基準點至關重要。', date: '2026-10-09' },
-        { id: 3, title: '現代認知科學與記憶宮殿建立指南', category: '心理學', url: 'https://example.com/memory-palace', hours: 1.5, note: '透過視覺空間錨點加深長期記憶連結。', date: '2026-10-10' },
-        { id: 4, title: '阿嘉莎·克莉絲蒂經典敘事架構剖析', category: '推理小說', url: 'https://example.com/christie-analysis', hours: 2.0, note: '雙重視角與可靠敘述者的盲點運用。', date: '2026-10-10' }
+      courses: JSON.parse(localStorage.getItem('minimal_courses_v5')) || defaultInitialCourses,
+      // 課外小事：捨棄網址，支援非必填時數與閱讀狀態 (completed / half_or_more / less_than_half)
+      knowledge: JSON.parse(localStorage.getItem('minimal_knowledge_v5')) || [
+        { id: 1, title: '福爾摩斯思考術：觀察與注意力的科學', category: '推理小說', hours: 2.5, status: 'completed', note: '關鍵在於將細節與常規模型對照，不放過反常之處。', date: '2026-10-08' },
+        { id: 2, title: '怪誕行為學：非理性決策如何影響日常選擇', category: '心理學', hours: 3.0, status: 'completed', note: '錨定效應無所不在，第一印象的基準點至關重要。', date: '2026-10-09' },
+        { id: 3, title: '現代認知科學與記憶宮殿建立指南', category: '心理學', hours: null, status: 'half_or_more', note: '透過視覺空間錨點加深長期記憶連結，讀到第4章。', date: '2026-10-10' },
+        { id: 4, title: '阿嘉莎·克莉絲蒂經典敘事架構剖析', category: '推理小說', hours: 1.0, status: 'less_than_half', note: '雙重視角與可靠敘述者的盲點運用。剛開篇。', date: '2026-10-10' }
       ]
     };
 
     function saveState() {
-      localStorage.setItem('minimal_todos_v4', JSON.stringify(state.todos));
-      localStorage.setItem('minimal_notes_v4', JSON.stringify(state.notes));
-      localStorage.setItem('minimal_schedule_v4', JSON.stringify(state.schedule));
-      localStorage.setItem('minimal_courses_v4', JSON.stringify(state.courses));
-      localStorage.setItem('minimal_knowledge_v4', JSON.stringify(state.knowledge));
+      localStorage.setItem('minimal_todos_v5', JSON.stringify(state.todos));
+      localStorage.setItem('minimal_notes_v5', JSON.stringify(state.notes));
+      localStorage.setItem('minimal_schedule_v5', JSON.stringify(state.schedule));
+      localStorage.setItem('minimal_courses_v5', JSON.stringify(state.courses));
+      localStorage.setItem('minimal_knowledge_v5', JSON.stringify(state.knowledge));
       updateBadges();
     }
 
@@ -1304,111 +1323,36 @@
       }).join('');
     }
 
-    /* ================= 5. 課外小事 (真實網頁跨域標題擷取 + 進步圖表) ================= */
-    
-    // 真實跨域標題解析（支援三采文化、博客來等各式網站）
-    async function autoParseLink() {
-      const urlInput = document.getElementById('knowLinkInput');
-      const titleInput = document.getElementById('knowTitleInput');
-      const catInput = document.getElementById('knowCategoryInput');
-      const parseBtn = document.getElementById('parseLinkBtn');
-      const btnText = document.getElementById('parseBtnText');
-      const rawUrl = urlInput.value.trim();
-
-      if (!rawUrl) {
-        alert('請先在上方貼上文章或書籍網址連結！');
-        return;
-      }
-
-      let parsedUrl;
-      try {
-        parsedUrl = new URL(rawUrl);
-      } catch (e) {
-        alert('請輸入包含 http:// 或 https:// 的有效網址！');
-        return;
-      }
-
-      // 載入狀態指示
-      parseBtn.disabled = true;
-      btnText.textContent = '深入分析網頁真實內容中...';
-      titleInput.placeholder = '連線擷取網頁真實標題中，請稍候...';
-      titleInput.value = '';
-
-      try {
-        // 使用公開 CORS 代理抓取實際 HTML 內容
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rawUrl)}`;
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('網路代理回應異常');
-        
-        const data = await response.json();
-
-        if (data && data.contents) {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(data.contents, 'text/html');
-
-          // 優先讀取 Open Graph og:title，其次取標準 <title>
-          const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute('content');
-          const docTitle = doc.querySelector('title')?.textContent;
-          let finalTitle = (ogTitle || docTitle || '').trim();
-
-          // 去除出版社/電商名稱贅字
-          finalTitle = finalTitle
-            .replace(/\s*[-|_–]\s*(三采文化|三采網路書店|博客來|誠品網路書店|誠品線上|Readmoo).*$/i, '')
-            .trim();
-
-          if (finalTitle) {
-            titleInput.value = finalTitle;
-          } else {
-            throw new Error('未從網頁中解析出標題');
-          }
-        } else {
-          throw new Error('未獲取到有效內容');
-        }
-      } catch (err) {
-        console.warn('線上深入解析受阻，採用備用路徑提取：', err);
-        let fallback = parsedUrl.pathname.split('/').filter(Boolean).pop() || parsedUrl.hostname;
-        titleInput.value = decodeURIComponent(fallback).replace(/[-_]/g, ' ');
-      } finally {
-        parseBtn.disabled = false;
-        btnText.textContent = '連線擷取網頁真實標題';
-        titleInput.placeholder = '例如：福爾摩斯思考術、怪誕心理學...';
-      }
-
-      // 根據抓取出的真實標題與網址文字進行智慧分類
-      const fullContent = (titleInput.value + ' ' + rawUrl).toLowerCase();
-      if (fullContent.includes('推理') || fullContent.includes('偵探') || fullContent.includes('小說') || fullContent.includes('mystery')) {
-        catInput.value = '推理小說';
-      } else if (fullContent.includes('心理') || fullContent.includes('行為') || fullContent.includes('大腦') || fullContent.includes('思考') || fullContent.includes('認知')) {
-        catInput.value = '心理學';
-      } else if (fullContent.includes('程式') || fullContent.includes('演算法') || fullContent.includes('ai') || fullContent.includes('科技') || fullContent.includes('code')) {
-        catInput.value = '程式科技';
-      } else if (!catInput.value) {
-        catInput.value = '課外閱讀';
-      }
-    }
+    /* ================= 5. 課外小事 (純手動記錄 + 進度狀態 + 進步圖表) ================= */
+    const statusMeta = {
+      completed: { label: '🎉 已讀完', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+      half_or_more: { label: '📖 未讀完 (≥50%)', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+      less_than_half: { label: '🌱 未讀完 (<50%)', badge: 'bg-amber-100 text-amber-900 border-amber-200' }
+    };
 
     function addKnowledgeItem(e) {
       e.preventDefault();
-      const link = document.getElementById('knowLinkInput').value.trim();
       const title = document.getElementById('knowTitleInput').value.trim();
       const category = document.getElementById('knowCategoryInput').value.trim();
-      const hours = parseFloat(document.getElementById('knowHoursInput').value) || 1.0;
+      const hoursVal = document.getElementById('knowHoursInput').value.trim();
+      const hours = hoursVal !== '' ? parseFloat(hoursVal) : null;
+      const status = document.getElementById('knowStatusInput').value;
       const note = document.getElementById('knowNoteInput').value.trim();
 
       if (!title || !category) return;
 
       state.knowledge.unshift({
         id: Date.now(),
-        url: link,
         title,
         category,
         hours,
+        status,
         note,
         date: new Date().toISOString().split('T')[0]
       });
 
-      document.getElementById('knowLinkInput').value = '';
       document.getElementById('knowTitleInput').value = '';
+      document.getElementById('knowHoursInput').value = '';
       document.getElementById('knowNoteInput').value = '';
 
       saveState();
@@ -1429,20 +1373,29 @@
       const chartContainer = document.getElementById('chartContainer');
       const progressContainer = document.getElementById('knowCategoryProgressBars');
 
+      const completedCount = state.knowledge.filter(k => k.status === 'completed').length;
+      const halfOrMoreCount = state.knowledge.filter(k => k.status === 'half_or_more').length;
+      const lessThanHalfCount = state.knowledge.filter(k => k.status === 'less_than_half').length;
       const totalCount = state.knowledge.length;
       const totalHours = state.knowledge.reduce((acc, cur) => acc + (cur.hours || 0), 0);
 
-      totalHoursEl.innerHTML = `${totalHours.toFixed(1)} <span class="text-xs font-normal">小時</span>`;
-      totalCountEl.innerHTML = `${totalCount} <span class="text-xs font-normal">篇</span>`;
+      document.getElementById('statCompletedCount').textContent = completedCount;
+      document.getElementById('statHalfOrMoreCount').textContent = halfOrMoreCount;
+      document.getElementById('statLessThanHalfCount').textContent = lessThanHalfCount;
 
+      totalHoursEl.innerHTML = `${totalHours.toFixed(1)} <span class="text-xs font-normal">小時</span>`;
+      totalCountEl.innerHTML = `${completedCount}/${totalCount} <span class="text-xs font-normal">篇已讀完</span>`;
+
+      // 依領域統計篇數
       const categoryMap = {};
       state.knowledge.forEach(k => {
         const cat = k.category || '未分類';
         if (!categoryMap[cat]) {
-          categoryMap[cat] = { hours: 0, count: 0 };
+          categoryMap[cat] = { count: 0, completed: 0, hours: 0 };
         }
-        categoryMap[cat].hours += (k.hours || 0);
         categoryMap[cat].count += 1;
+        if (k.status === 'completed') categoryMap[cat].completed += 1;
+        categoryMap[cat].hours += (k.hours || 0);
       });
 
       const categories = Object.keys(categoryMap);
@@ -1458,14 +1411,15 @@
         return;
       }
 
+      // 進度條：各領域所佔比例
       progressContainer.innerHTML = categories.map(cat => {
         const item = categoryMap[cat];
-        const pct = totalHours > 0 ? Math.round((item.hours / totalHours) * 100) : 0;
+        const pct = totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0;
         return `
           <div>
             <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium text-slate-700">${escapeHtml(cat)} (${item.count}篇)</span>
-              <span class="text-slate-500 font-mono">${item.hours.toFixed(1)}h (${pct}%)</span>
+              <span class="font-medium text-slate-700">${escapeHtml(cat)}</span>
+              <span class="text-slate-500 font-mono">${item.count} 篇 (${item.completed} 篇讀完)</span>
             </div>
             <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
               <div class="h-full bg-amber-500 rounded-full" style="width: ${pct}%"></div>
@@ -1474,15 +1428,16 @@
         `;
       }).join('');
 
-      const maxHours = Math.max(...categories.map(c => categoryMap[c].hours), 1);
+      // 柱狀圖：顯示各領域累積篇數
+      const maxCount = Math.max(...categories.map(c => categoryMap[c].count), 1);
 
       chartContainer.innerHTML = categories.map(cat => {
         const item = categoryMap[cat];
-        const heightPct = Math.max(Math.round((item.hours / maxHours) * 100), 12);
+        const heightPct = Math.max(Math.round((item.count / maxCount) * 100), 16);
 
         return `
           <div class="flex-1 flex flex-col items-center h-full justify-end group">
-            <span class="text-[10px] font-mono font-bold text-slate-600 mb-1 opacity-80 group-hover:opacity-100">${item.hours.toFixed(1)}h</span>
+            <span class="text-[10px] font-mono font-bold text-slate-600 mb-1 opacity-80 group-hover:opacity-100">${item.count}篇</span>
             <div class="w-full max-w-[42px] bg-indigo-100 group-hover:bg-indigo-600 rounded-t-xl transition-all duration-300 relative flex items-end justify-center shadow-xs"
                  style="height: ${heightPct}%;">
               <div class="w-full h-1 bg-indigo-500 rounded-t-xl"></div>
@@ -1499,10 +1454,14 @@
       const container = document.getElementById('knowledgeList');
       const emptyEl = document.getElementById('emptyKnowledgeList');
       const filterCat = document.getElementById('filterCategorySelect').value;
+      const filterStatus = document.getElementById('filterStatusSelect').value;
 
       let filtered = state.knowledge;
       if (filterCat !== 'all') {
         filtered = filtered.filter(k => k.category === filterCat);
+      }
+      if (filterStatus !== 'all') {
+        filtered = filtered.filter(k => k.status === filterStatus);
       }
 
       if (filtered.length === 0) {
@@ -1512,45 +1471,48 @@
       }
       emptyEl.classList.add('hidden');
 
-      container.innerHTML = filtered.map(item => `
-        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-xs hover:border-slate-300 transition flex flex-col justify-between">
-          <div>
-            <div class="flex items-start justify-between gap-2 mb-2">
-              <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold border border-amber-200">
-                ${escapeHtml(item.category)}
-              </span>
-              <div class="flex items-center gap-1">
-                <span class="text-xs font-mono text-slate-400">${item.date}</span>
-                <button onclick="deleteKnowledge(${item.id})" class="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-600 transition">
-                  <i class="ph-bold ph-trash text-sm"></i>
-                </button>
+      container.innerHTML = filtered.map(item => {
+        const sInfo = statusMeta[item.status] || statusMeta.completed;
+
+        return `
+          <div class="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-xs hover:border-slate-300 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold border border-slate-200">
+                    ${escapeHtml(item.category)}
+                  </span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full ${sInfo.badge} font-semibold border">
+                    ${sInfo.label}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="text-xs font-mono text-slate-400">${item.date}</span>
+                  <button onclick="deleteKnowledge(${item.id})" class="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-600 transition">
+                    <i class="ph-bold ph-trash text-sm"></i>
+                  </button>
+                </div>
               </div>
+
+              <h4 class="font-bold text-slate-900 text-sm leading-snug line-clamp-2 mt-1">${escapeHtml(item.title)}</h4>
+
+              ${item.note ? `
+                <p class="text-xs text-slate-600 bg-slate-50 rounded-xl p-2.5 mt-2.5 border border-slate-100 leading-relaxed whitespace-pre-wrap">
+                  <span class="font-semibold text-slate-700">筆記心得：</span>${escapeHtml(item.note)}
+                </p>
+              ` : ''}
             </div>
 
-            <h4 class="font-bold text-slate-900 text-sm leading-snug line-clamp-2">${escapeHtml(item.title)}</h4>
-
-            ${item.note ? `
-              <p class="text-xs text-slate-600 bg-slate-50 rounded-xl p-2.5 mt-2.5 border border-slate-100 leading-relaxed whitespace-pre-wrap">
-                <span class="font-semibold text-slate-700">筆記心得：</span>${escapeHtml(item.note)}
-              </p>
-            ` : ''}
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span class="flex items-center gap-1 font-mono font-medium text-slate-700">
+                <i class="ph-bold ph-timer text-amber-600"></i>
+                <span>${item.hours !== null && item.hours !== undefined ? `研讀 ${item.hours} 小時` : '未記錄時長'}</span>
+              </span>
+              <span class="text-[11px] text-slate-400">課外探索</span>
+            </div>
           </div>
-
-          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span class="flex items-center gap-1 font-mono font-medium text-slate-700">
-              <i class="ph-bold ph-timer text-amber-600"></i>
-              <span>研讀 ${item.hours} 小時</span>
-            </span>
-            ${item.url ? `
-              <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer"
-                 class="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium">
-                <span>前往連結</span>
-                <i class="ph-bold ph-arrow-square-out"></i>
-              </a>
-            ` : '<span class="text-slate-400">純備忘</span>'}
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     /* ================= 徽章更新與初始化 ================= */
