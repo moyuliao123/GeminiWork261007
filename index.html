@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>極簡工作台 - 待辦・便條紙・日程表・週課表</title>
+  <title>極簡工作台 - 待辦・便條紙・日程・課表・課外小事</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Phosphor Icons for modern minimalist UI icons -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -39,7 +39,7 @@
         </div>
         <div>
           <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">極簡工作台</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">待辦 · 便條 · 日程 · 視覺化課表</p>
+          <p class="text-xs text-slate-500 hidden sm:block">待辦 · 便條 · 固定日程 · 課表 · 課外小事</p>
         </div>
       </div>
 
@@ -62,8 +62,13 @@
         </button>
         <button onclick="switchTab('timetable')" id="tabBtn-timetable" class="tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap">
           <i class="ph-bold ph-table text-base"></i>
-          <span>可視化課表</span>
+          <span>課表</span>
           <span id="badge-timetable-count" class="text-xs px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-700 font-normal">0</span>
+        </button>
+        <button onclick="switchTab('knowledge')" id="tabBtn-knowledge" class="tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap">
+          <i class="ph-bold ph-book-open text-base"></i>
+          <span>課外小事</span>
+          <span id="badge-knowledge-count" class="text-xs px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 font-normal">0</span>
         </button>
       </nav>
     </div>
@@ -77,7 +82,7 @@
         <form id="todoForm" onsubmit="addTodo(event)" class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
             <i class="ph-bold ph-plus absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="todoInput" required placeholder="新增待辦任務（例如：繳交微積分作業、機器人期中簡報）..."
+            <input type="text" id="todoInput" required placeholder="新增待辦任務（例如：微積分習題、專案期末報告）..."
                    class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 text-sm transition">
           </div>
           <div class="flex items-center gap-2">
@@ -125,7 +130,7 @@
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="font-bold text-slate-800 text-sm sm:text-base">靈感與隨手筆記</h2>
-          <p class="text-xs text-slate-500">快速紀錄即時想法、程式筆記或作業備忘</p>
+          <p class="text-xs text-slate-500">快速紀錄即時想法、代碼片段或隨手備忘</p>
         </div>
         <button onclick="openNoteModal()" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold rounded-xl text-sm transition shadow-xs flex items-center gap-1.5 active:scale-98">
           <i class="ph-bold ph-note-pencil text-base"></i>
@@ -144,40 +149,84 @@
       </div>
     </section>
 
-    <!-- ==================== 3. 日程表 (Schedule) ==================== -->
+    <!-- ==================== 3. 日程表 (支援單次 + 每週固定日程) ==================== -->
     <section id="view-schedule" class="hidden space-y-6">
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-        <form id="scheduleForm" onsubmit="addScheduleItem(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-          <div class="sm:col-span-4">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">事件名稱</label>
-            <input type="text" id="scheduleTitle" required placeholder="例如：期中考週、專題進度會議"
-                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+        <form id="scheduleForm" onsubmit="addScheduleItem(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <div class="sm:col-span-4">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">事件名稱</label>
+              <input type="text" id="scheduleTitle" required placeholder="例如：健身運動、專案固定組會"
+                     class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+            </div>
+            <div class="sm:col-span-3">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">類型</label>
+              <select id="scheduleType" onchange="toggleScheduleTypeInputs()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 bg-white">
+                <option value="once">單次日程 (指定日期)</option>
+                <option value="recurring">每週固定日程 (循環)</option>
+              </select>
+            </div>
+            <div class="sm:col-span-3">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">時間</label>
+              <input type="time" id="scheduleTime" required
+                     class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-700">
+            </div>
+            <div class="sm:col-span-2 flex items-end">
+              <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 active:scale-98 text-white rounded-xl text-sm font-medium transition shadow-xs flex items-center justify-center gap-1.5">
+                <i class="ph-bold ph-calendar-plus text-base"></i>
+                <span>儲存</span>
+              </button>
+            </div>
           </div>
-          <div class="sm:col-span-3">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">日期</label>
-            <input type="date" id="scheduleDate" required
-                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-700">
+
+          <!-- 單次專用日期選擇 -->
+          <div id="onceScheduleBox" class="pt-1">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">指定日期</label>
+            <input type="date" id="scheduleDate"
+                   class="w-full sm:w-64 px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-700">
           </div>
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">時間</label>
-            <input type="time" id="scheduleTime" required
-                   class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 text-slate-700">
-          </div>
-          <div class="sm:col-span-3 flex items-end">
-            <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-98 text-white rounded-xl text-sm font-medium transition shadow-xs flex items-center justify-center gap-1.5">
-              <i class="ph-bold ph-calendar-plus text-base"></i>
-              <span>加入日程</span>
-            </button>
+
+          <!-- 每週固定循環複選框 -->
+          <div id="recurringScheduleBox" class="hidden pt-1">
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">固定重複於（可複選，例如：勾選週三～五）</label>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                <input type="checkbox" name="recurringDay" value="1" class="rounded text-slate-900"> 週一
+              </label>
+              <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                <input type="checkbox" name="recurringDay" value="2" class="rounded text-slate-900"> 週二
+              </label>
+              <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                <input type="checkbox" name="recurringDay" value="3" class="rounded text-slate-900"> 週三
+              </label>
+              <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                <input type="checkbox" name="recurringDay" value="4" class="rounded text-slate-900"> 週四
+              </label>
+              <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                <input type="checkbox" name="recurringDay" value="5" class="rounded text-slate-900"> 週五
+              </label>
+              <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                <input type="checkbox" name="recurringDay" value="6" class="rounded text-slate-900"> 週六
+              </label>
+              <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                <input type="checkbox" name="recurringDay" value="0" class="rounded text-slate-900"> 週日
+              </label>
+            </div>
           </div>
         </form>
       </div>
 
+      <!-- 日程清單分頁標籤（固定 vs 單次） -->
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
-          <i class="ph-bold ph-clock text-slate-500"></i>
-          <span>近期日程安排</span>
+          <i class="ph-bold ph-calendar-check text-slate-500"></i>
+          <span>近期安排與固定習慣</span>
         </h3>
-        <span class="text-xs text-slate-400">依日期與時間排序</span>
+        <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-600">
+          <button onclick="setScheduleTabFilter('all')" id="schTab-all" class="px-2.5 py-1 rounded bg-white text-slate-900 shadow-2xs font-semibold">全部</button>
+          <button onclick="setScheduleTabFilter('recurring')" id="schTab-recurring" class="px-2.5 py-1 rounded hover:text-slate-900">每週固定</button>
+          <button onclick="setScheduleTabFilter('once')" id="schTab-once" class="px-2.5 py-1 rounded hover:text-slate-900">單次日程</button>
+        </div>
       </div>
 
       <div id="scheduleList" class="space-y-3"></div>
@@ -187,21 +236,19 @@
           <i class="ph-bold ph-calendar-x text-2xl"></i>
         </div>
         <p class="text-sm font-semibold text-slate-700">尚未建立任何日程</p>
-        <p class="text-xs text-slate-400 mt-1">在上方輸入日期與時間以建立行程</p>
+        <p class="text-xs text-slate-400 mt-1">在上方輸入單次日程或排定每週固定作息</p>
       </div>
     </section>
 
     <!-- ==================== 4. 可視化時間表 + 週課表 (Timetable) ==================== -->
     <section id="view-timetable" class="hidden space-y-6">
-      
-      <!-- Top Actions & Today Summary -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2">
             <h2 class="font-bold text-slate-900 text-base sm:text-lg">每週課表與作息時間軸</h2>
             <span id="todayDayBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60"></span>
           </div>
-          <p class="text-xs text-slate-500 mt-1">依據實際節次時間對照排程，點擊格子或按鈕即可編輯與新增課程</p>
+          <p class="text-xs text-slate-500 mt-1">依據真實校園節次整合，自動同步今日排程與每週固定日程</p>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="resetToDefaultCourses()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 rounded-xl text-xs font-medium transition flex items-center gap-1.5 whitespace-nowrap">
@@ -215,19 +262,19 @@
         </div>
       </div>
 
-      <!-- Today's Visual Timeline Section -->
+      <!-- 今日綜合可視化時間軸 -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
           <div class="flex items-center gap-2">
             <i class="ph-bold ph-hourglass-high text-indigo-600 text-lg"></i>
-            <h3 class="font-bold text-slate-800 text-sm">今日視覺化時間軸（日程 & 課表）</h3>
+            <h3 class="font-bold text-slate-800 text-sm">今日視覺化時間軸（課表 ＋ 今日單次日程 ＋ 每週固定排程）</h3>
           </div>
           <span class="text-xs text-slate-400" id="currentDateDisplay"></span>
         </div>
         <div id="todayTimeline" class="space-y-3"></div>
       </div>
 
-      <!-- Weekly Timetable Grid Table -->
+      <!-- 全週課表矩陣 -->
       <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
           <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
@@ -249,10 +296,146 @@
                 <th class="py-3 px-3 w-[18%]" id="col-day-5">週五 (Fri)</th>
               </tr>
             </thead>
-            <tbody id="timetableGridBody" class="divide-y divide-slate-100">
-              <!-- Dynamically populated periods 1 to 8 + Lunch break -->
-            </tbody>
+            <tbody id="timetableGridBody" class="divide-y divide-slate-100"></tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. 課外小事 (Knowledge, Links & Analytics) ==================== -->
+    <section id="view-knowledge" class="hidden space-y-6">
+      
+      <!-- 匯入與分析輸入面板 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-bold text-slate-800 text-base">課外小事 · 知識與興趣紀錄</h2>
+            <p class="text-xs text-slate-500">匯入網路文章、書籍或影片連結，自動劃分至特定領域，追蹤自己每天累積的成長軌跡！</p>
+          </div>
+        </div>
+
+        <form id="knowledgeForm" onsubmit="addKnowledgeItem(event)" class="space-y-3.5">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+              <i class="ph-bold ph-link absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="url" id="knowLinkInput" required placeholder="貼上文章、影片或書訊連結 (例如：https://example.com/psychology-note)..."
+                     class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition">
+            </div>
+            <button type="button" onclick="autoParseLink()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 whitespace-nowrap">
+              <i class="ph-bold ph-magic-wand text-base text-amber-500"></i>
+              <span>快速擷取標題與資訊</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <div class="sm:col-span-5">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">小事標題 / 書名</label>
+              <input type="text" id="knowTitleInput" required placeholder="例如：福爾摩斯思考術、怪誕心理學觀察..."
+                     class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+            </div>
+            <div class="sm:col-span-3">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">領域類別 (可自訂或選取)</label>
+              <input type="text" id="knowCategoryInput" list="categoryOptions" required placeholder="例：推理小說、心理學"
+                     class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+              <datalist id="categoryOptions">
+                <option value="推理小說"></option>
+                <option value="心理學"></option>
+                <option value="程式科技"></option>
+                <option value="商業思考"></option>
+                <option value="社會哲學"></option>
+                <option value="語言文化"></option>
+              </datalist>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">閱讀/研究時數 (hr)</label>
+              <input type="number" step="0.5" min="0.5" id="knowHoursInput" value="1.0" required
+                     class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+            </div>
+            <div class="sm:col-span-2 flex items-end">
+              <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-98 text-amber-950 font-bold rounded-xl text-sm transition shadow-xs flex items-center justify-center gap-1.5 whitespace-nowrap">
+                <i class="ph-bold ph-plus text-base"></i>
+                <span>記錄進步</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">心得與精華筆記（選填）</label>
+            <textarea id="knowNoteInput" rows="2" placeholder="記下最啟發你的一個思維模型、金句或解題邏輯..."
+                      class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none"></textarea>
+          </div>
+        </form>
+      </div>
+
+      <!-- 可視化進步圖表 (Analytics Dashboard) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- 左側：領域累積數據統計卡片 -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <i class="ph-bold ph-chart-donut text-amber-500 text-base"></i>
+              <span>領域進步總覽</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">累計投入知識時數與涵蓋主題數量</p>
+            
+            <div class="grid grid-cols-2 gap-3 my-4">
+              <div class="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200/60">
+                <span class="text-[11px] font-semibold text-amber-800">總累積時數</span>
+                <div class="text-2xl font-bold text-amber-950 mt-1" id="totalKnowHours">0 <span class="text-xs font-normal">小時</span></div>
+              </div>
+              <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60">
+                <span class="text-[11px] font-semibold text-slate-600">完成主題小事</span>
+                <div class="text-2xl font-bold text-slate-800 mt-1" id="totalKnowCount">0 <span class="text-xs font-normal">篇</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 類別佔比進度條 -->
+          <div>
+            <div class="text-xs font-semibold text-slate-600 mb-2">各領域投入分佈比例</div>
+            <div id="knowCategoryProgressBars" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- 右側：SVG 可視化直方圖表 (Bar Chart) -->
+        <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <i class="ph-bold ph-chart-bar text-indigo-600 text-base"></i>
+              <span>領域成長柱狀圖（累積投入時數）</span>
+            </h3>
+            <span class="text-xs text-slate-400">數據隨小事即時更新</span>
+          </div>
+          
+          <div id="chartContainer" class="w-full flex items-end gap-3 sm:gap-6 h-52 pt-6 px-2 border-b border-slate-200">
+            <!-- 柱狀圖由 JavaScript 渲染 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 課外小事清單 -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+            <i class="ph-bold ph-bookmarks text-slate-500"></i>
+            <span>課外探索紀錄列表</span>
+          </h3>
+          <div class="flex items-center gap-2">
+            <select id="filterCategorySelect" onchange="renderKnowledgeList()" class="px-2.5 py-1 text-xs rounded-lg border border-slate-200 bg-white text-slate-700">
+              <option value="all">所有領域分類</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="knowledgeList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+        <div id="emptyKnowledgeList" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
+          <div class="w-12 h-12 mx-auto rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+            <i class="ph-bold ph-lightbulb text-2xl"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-700">尚未記錄課外小事</p>
+          <p class="text-xs text-slate-400 mt-1">貼上感興趣的文章或書籍連結，開始點滴成長！</p>
         </div>
       </div>
 
@@ -314,7 +497,7 @@
     </div>
   </div>
 
-  <!-- Course Add / Edit Modal -->
+  <!-- Course Modal -->
   <div id="courseModal" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl border border-slate-100 transition-all">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -325,13 +508,11 @@
       </div>
       <form id="courseForm" onsubmit="saveCourse(event)" class="mt-4 space-y-4">
         <input type="hidden" id="editCourseId" value="">
-        
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">課程名稱</label>
           <input type="text" id="courseNameInput" required placeholder="例如：微積分(1)、數位系統導論"
                  class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
         </div>
-
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">星期</label>
@@ -357,7 +538,6 @@
             </select>
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">教室 / 地點</label>
@@ -370,7 +550,6 @@
                    class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10">
           </div>
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1.5">課程卡片配色</label>
           <div class="flex items-center gap-3">
@@ -396,7 +575,6 @@
             </label>
           </div>
         </div>
-
         <div class="flex items-center justify-between pt-2">
           <button type="button" id="deleteCourseBtn" onclick="deleteCurrentCourse()" class="hidden px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-medium transition">
             刪除此課
@@ -411,14 +589,12 @@
   </div>
 
   <script>
-    // 依據圖片校準之時間節次
     const PERIODS = [
       { id: 1, name: '第 1 節', start: '07:00', end: '07:50' },
       { id: 2, name: '第 2 節', start: '08:00', end: '08:50' },
       { id: 3, name: '第 3 節', start: '09:00', end: '09:50' },
       { id: 4, name: '第 4 節', start: '10:10', end: '11:00' },
       { id: 5, name: '第 5 節', start: '11:10', end: '12:00' },
-      // 12:10 - 13:00 為中午時段
       { id: 6, name: '第 6 節', start: '13:30', end: '14:20' },
       { id: 7, name: '第 7 節', start: '14:30', end: '15:20' },
       { id: 8, name: '第 8 節', start: '15:40', end: '16:30' }
@@ -432,30 +608,24 @@
       rose: { bg: 'bg-rose-50 hover:bg-rose-100/80', border: 'border-rose-200', text: 'text-rose-950', badge: 'bg-rose-200/60 text-rose-700' }
     };
 
-    // 依據使用者課表圖片設定之預設資料
     const defaultInitialCourses = [
-      // 週一
       { id: 1, name: '生物、醫學與健康通識', day: 1, period: 4, room: '科藝館501', teacher: '郭碧祝', color: 'emerald' },
       { id: 2, name: '生物、醫學與健康通識', day: 1, period: 5, room: '科藝館501', teacher: '郭碧祝', color: 'emerald' },
-      // 週二
       { id: 3, name: '數位系統導論', day: 2, period: 3, room: '五育樓201-大', teacher: '施釗德', color: 'indigo' },
       { id: 4, name: '數位系統導論', day: 2, period: 4, room: '五育樓201-大', teacher: '施釗德', color: 'indigo' },
       { id: 5, name: '數位系統導論', day: 2, period: 5, room: '五育樓201-大', teacher: '施釗德', color: 'indigo' },
       { id: 6, name: '離散數學', day: 2, period: 6, room: '五育樓305A', teacher: '黃樹乾', color: 'sky' },
       { id: 7, name: '離散數學', day: 2, period: 7, room: '五育樓305A', teacher: '黃樹乾', color: 'sky' },
       { id: 8, name: '離散數學', day: 2, period: 8, room: '五育樓305A', teacher: '黃樹乾', color: 'sky' },
-      // 週三
       { id: 9, name: '數位積體電路設計與實驗', day: 3, period: 3, room: '教科館401-電路實驗室', teacher: '林義凱', color: 'rose' },
       { id: 10, name: '數位積體電路設計與實驗', day: 3, period: 4, room: '教科館401-電路實驗室', teacher: '林義凱', color: 'rose' },
       { id: 11, name: '數位積體電路設計與實驗', day: 3, period: 5, room: '教科館401-電路實驗室', teacher: '林義凱', color: 'rose' },
       { id: 12, name: '生成式AI應用與實習', day: 3, period: 6, room: '五育樓電B', teacher: '蔡進聰', color: 'amber' },
       { id: 13, name: '生成式AI應用與實習', day: 3, period: 7, room: '五育樓電B', teacher: '蔡進聰', color: 'amber' },
       { id: 14, name: '生成式AI應用與實習', day: 3, period: 8, room: '五育樓電B', teacher: '蔡進聰', color: 'amber' },
-      // 週四
       { id: 15, name: '微積分(1)', day: 4, period: 3, room: '五育樓305A', teacher: '梁惟捷', color: 'indigo' },
       { id: 16, name: '微積分(1)', day: 4, period: 4, room: '五育樓305A', teacher: '梁惟捷', color: 'indigo' },
       { id: 17, name: '微積分(1)', day: 4, period: 5, room: '五育樓305A', teacher: '梁惟捷', color: 'indigo' },
-      // 週五
       { id: 18, name: '智慧型機器人概論與實驗(一)', day: 5, period: 3, room: '二館-SB23', teacher: '邱碩峯', color: 'sky' },
       { id: 19, name: '智慧型機器人概論與實驗(一)', day: 5, period: 4, room: '二館-SB23', teacher: '邱碩峯', color: 'sky' },
       { id: 20, name: '智慧型機器人概論與實驗(一)', day: 5, period: 5, room: '二館-SB23', teacher: '邱碩峯', color: 'sky' }
@@ -464,62 +634,65 @@
     let state = {
       currentTab: 'todos',
       todoFilter: 'all',
-      todos: JSON.parse(localStorage.getItem('minimal_app_todos_v2')) || [
-        { id: 1, text: '預習微積分(1) 第 3 章極限與連續', priority: 'normal', completed: false, createdAt: '2026-10-08' },
-        { id: 2, text: '完成數位積體電路實驗預報', priority: 'high', completed: false, createdAt: '2026-10-09' },
-        { id: 3, text: '準備生成式AI應用與實習專案主題', priority: 'low', completed: true, createdAt: '2026-10-07' }
+      scheduleFilter: 'all',
+      todos: JSON.parse(localStorage.getItem('minimal_todos_v3')) || [
+        { id: 1, text: '微積分習題演練', priority: 'high', completed: false, createdAt: '2026-10-10' },
+        { id: 2, text: '閱讀心理學新書章節', priority: 'normal', completed: true, createdAt: '2026-10-10' }
       ],
-      notes: JSON.parse(localStorage.getItem('minimal_app_notes_v2')) || [
-        { id: 1, title: '常用 Prompt 技巧', content: '1. 明確角色與目標\n2. 給予條列式範例 (Few-shot)\n3. 要求逐步思考 (Chain of Thought)', color: 'yellow', updatedAt: '今天 10:20' },
-        { id: 2, title: '本學期修課重點', content: '五育樓305A (微積分、離散數學)\n教科館401 (電路實驗室)\n二館SB23 (機器人實驗)', color: 'blue', updatedAt: '今天 11:45' }
+      notes: JSON.parse(localStorage.getItem('minimal_notes_v3')) || [
+        { id: 1, title: '常用 Prompt 技巧', content: '1. 明確角色與目標\n2. 給予條列式範例 (Few-shot)\n3. 要求逐步思考 (Chain of Thought)', color: 'yellow', updatedAt: '今天 10:20' }
       ],
-      schedule: JSON.parse(localStorage.getItem('minimal_app_schedule_v2')) || [
-        { id: 1, title: '機器人專題實驗週會', date: '2026-10-16', time: '14:30' },
-        { id: 2, title: '生成式AI實習作業繳交', date: '2026-10-21', time: '23:59' }
+      // 升級：支援 isRecurring 與 recurringDays (例如每週一，或每週三~五 [3,4,5])
+      schedule: JSON.parse(localStorage.getItem('minimal_schedule_v3')) || [
+        { id: 1, title: '專案線上週會', isRecurring: true, recurringDays: [1], time: '10:00' }, // 每週一
+        { id: 2, title: '核心健身鍛鍊', isRecurring: true, recurringDays: [3, 4, 5], time: '17:30' }, // 每週三~五
+        { id: 3, title: '演算法小組討論', isRecurring: false, date: '2026-10-15', time: '14:00' }
       ],
-      courses: JSON.parse(localStorage.getItem('minimal_app_courses_v2')) || defaultInitialCourses
+      courses: JSON.parse(localStorage.getItem('minimal_courses_v3')) || defaultInitialCourses,
+      // 全新：課外小事知識庫
+      knowledge: JSON.parse(localStorage.getItem('minimal_knowledge_v3')) || [
+        { id: 1, title: '福爾摩斯演繹思考法：觀察與注意力的科學', category: '推理小說', url: 'https://example.com/holmes-deduction', hours: 2.5, note: '關鍵在於將細節與常規模型對照，不放過反常之處。', date: '2026-10-08' },
+        { id: 2, title: '怪誕行為學：非理性決策如何影響日常選擇', category: '心理學', url: 'https://example.com/irrational-psychology', hours: 3.0, note: '錨定效應無所不在，第一印象的基準點至關重要。', date: '2026-10-09' },
+        { id: 3, title: '現代認知科學與記憶宮殿建立指南', category: '心理學', url: 'https://example.com/memory-palace', hours: 1.5, note: '透過視覺空間錨點加深長期記憶連結。', date: '2026-10-10' },
+        { id: 4, title: '阿嘉莎·克莉絲蒂經典敘事架構剖析', category: '推理小說', url: 'https://example.com/christie-analysis', hours: 2.0, note: '雙重視角與可靠敘述者的盲點運用。', date: '2026-10-10' }
+      ]
     };
 
     function saveState() {
-      localStorage.setItem('minimal_app_todos_v2', JSON.stringify(state.todos));
-      localStorage.setItem('minimal_app_notes_v2', JSON.stringify(state.notes));
-      localStorage.setItem('minimal_app_schedule_v2', JSON.stringify(state.schedule));
-      localStorage.setItem('minimal_app_courses_v2', JSON.stringify(state.courses));
+      localStorage.setItem('minimal_todos_v3', JSON.stringify(state.todos));
+      localStorage.setItem('minimal_notes_v3', JSON.stringify(state.notes));
+      localStorage.setItem('minimal_schedule_v3', JSON.stringify(state.schedule));
+      localStorage.setItem('minimal_courses_v3', JSON.stringify(state.courses));
+      localStorage.setItem('minimal_knowledge_v3', JSON.stringify(state.knowledge));
       updateBadges();
-    }
-
-    function resetToDefaultCourses() {
-      if (confirm('確定要還原成圖片中的課表內容嗎？這將覆蓋現有修改。')) {
-        state.courses = [...defaultInitialCourses];
-        saveState();
-        renderTimetable();
-        renderTodayTimeline();
-      }
     }
 
     function switchTab(tabId) {
       state.currentTab = tabId;
-      const tabs = ['todos', 'notes', 'schedule', 'timetable'];
+      const tabs = ['todos', 'notes', 'schedule', 'timetable', 'knowledge'];
       
       tabs.forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const btn = document.getElementById(`tabBtn-${t}`);
         if (t === tabId) {
           view.classList.remove('hidden');
-          btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs whitespace-nowrap';
+          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs whitespace-nowrap';
         } else {
           view.classList.add('hidden');
-          btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap';
+          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap';
         }
       });
 
       if (tabId === 'timetable') {
         renderTimetable();
         renderTodayTimeline();
+      } else if (tabId === 'knowledge') {
+        renderKnowledgeDashboard();
+        renderKnowledgeList();
       }
     }
 
-    /* ================= 待辦事項邏輯 ================= */
+    /* ================= 待辦事項 ================= */
     function addTodo(e) {
       e.preventDefault();
       const input = document.getElementById('todoInput');
@@ -527,14 +700,13 @@
       const text = input.value.trim();
       if (!text) return;
 
-      const newTodo = {
+      state.todos.unshift({
         id: Date.now(),
         text: text,
         priority: priority,
         completed: false,
         createdAt: new Date().toISOString().split('T')[0]
-      };
-      state.todos.unshift(newTodo);
+      });
       input.value = '';
       saveState();
       renderTodos();
@@ -556,11 +728,7 @@
       state.todoFilter = filter;
       ['all', 'active', 'completed'].forEach(f => {
         const btn = document.getElementById(`todoFilter-${f}`);
-        if (f === filter) {
-          btn.className = 'px-3 py-1 rounded-lg bg-white text-slate-900 shadow-2xs font-semibold';
-        } else {
-          btn.className = 'px-3 py-1 rounded-lg hover:text-slate-900';
-        }
+        btn.className = f === filter ? 'px-3 py-1 rounded-lg bg-white text-slate-900 shadow-2xs font-semibold' : 'px-3 py-1 rounded-lg hover:text-slate-900';
       });
       renderTodos();
     }
@@ -615,7 +783,7 @@
       `).join('');
     }
 
-    /* ================= 便條紙邏輯 ================= */
+    /* ================= 便條紙 ================= */
     const noteColorStyles = {
       yellow: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-950', badge: 'bg-amber-200/70' },
       green: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-950', badge: 'bg-emerald-200/70' },
@@ -657,7 +825,7 @@
 
     function saveNote(e) {
       e.preventDefault();
-      const editId = document.getElementById('editNoteId').value;
+      const editId = document.getElementById('editNoteId');
       const title = document.getElementById('noteTitleInput').value.trim();
       const content = document.getElementById('noteContentInput').value.trim();
       const color = document.querySelector('input[name="noteColor"]:checked').value;
@@ -665,21 +833,14 @@
 
       if (!content) return;
 
-      if (editId) {
-        state.notes = state.notes.map(n => n.id === Number(editId) ? {
-          ...n,
-          title: title,
-          content: content,
-          color: color,
-          updatedAt: `編輯於 ${nowStr}`
+      if (editId.value) {
+        state.notes = state.notes.map(n => n.id === Number(editId.value) ? {
+          ...n, title, content, color, updatedAt: `編輯於 ${nowStr}`
         } : n);
       } else {
         state.notes.unshift({
           id: Date.now(),
-          title: title,
-          content: content,
-          color: color,
-          updatedAt: `建立於 ${nowStr}`
+          title, content, color, updatedAt: `建立於 ${nowStr}`
         });
       }
 
@@ -732,23 +893,63 @@
       }).join('');
     }
 
-    /* ================= 日程表邏輯 ================= */
+    /* ================= 日程表（單次 + 每週固定日程） ================= */
+    const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+
+    function toggleScheduleTypeInputs() {
+      const type = document.getElementById('scheduleType').value;
+      const onceBox = document.getElementById('onceScheduleBox');
+      const recBox = document.getElementById('recurringScheduleBox');
+
+      if (type === 'once') {
+        onceBox.classList.remove('hidden');
+        recBox.classList.add('hidden');
+      } else {
+        onceBox.classList.add('hidden');
+        recBox.classList.remove('hidden');
+      }
+    }
+
     function addScheduleItem(e) {
       e.preventDefault();
       const title = document.getElementById('scheduleTitle').value.trim();
-      const date = document.getElementById('scheduleDate').value;
+      const type = document.getElementById('scheduleType').value;
       const time = document.getElementById('scheduleTime').value;
 
-      if (!title || !date || !time) return;
+      if (!title || !time) return;
 
-      state.schedule.push({
-        id: Date.now(),
-        title: title,
-        date: date,
-        time: time
-      });
+      if (type === 'once') {
+        const date = document.getElementById('scheduleDate').value;
+        if (!date) {
+          alert('請選擇單次日程的日期！');
+          return;
+        }
+        state.schedule.push({
+          id: Date.now(),
+          title,
+          isRecurring: false,
+          date,
+          time
+        });
+      } else {
+        // 抓取複選每週星期
+        const checkedBoxes = document.querySelectorAll('input[name="recurringDay"]:checked');
+        const recurringDays = Array.from(checkedBoxes).map(cb => parseInt(cb.value, 10));
 
-      state.schedule.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+        if (recurringDays.length === 0) {
+          alert('請至少勾選一個重複的星期（例如：週一，或週三至週五）！');
+          return;
+        }
+
+        state.schedule.push({
+          id: Date.now(),
+          title,
+          isRecurring: true,
+          recurringDays: recurringDays.sort((a,b)=>a-b),
+          time
+        });
+      }
+
       document.getElementById('scheduleTitle').value = '';
       saveState();
       renderSchedule();
@@ -762,52 +963,96 @@
       renderTodayTimeline();
     }
 
+    function setScheduleTabFilter(f) {
+      state.scheduleFilter = f;
+      ['all', 'recurring', 'once'].forEach(tab => {
+        const btn = document.getElementById(`schTab-${tab}`);
+        btn.className = tab === f ? 'px-2.5 py-1 rounded bg-white text-slate-900 shadow-2xs font-semibold' : 'px-2.5 py-1 rounded hover:text-slate-900';
+      });
+      renderSchedule();
+    }
+
     function renderSchedule() {
       const list = document.getElementById('scheduleList');
       const emptyEl = document.getElementById('emptyScheduleList');
 
-      if (state.schedule.length === 0) {
+      let filtered = state.schedule;
+      if (state.scheduleFilter === 'recurring') filtered = state.schedule.filter(s => s.isRecurring);
+      if (state.scheduleFilter === 'once') filtered = state.schedule.filter(s => !s.isRecurring);
+
+      if (filtered.length === 0) {
         list.innerHTML = '';
         emptyEl.classList.remove('hidden');
         return;
       }
       emptyEl.classList.add('hidden');
 
-      list.innerHTML = state.schedule.map(item => {
-        const itemDate = new Date(`${item.date}T00:00:00`);
-        const isPast = new Date(`${item.date}T${item.time}`) < new Date();
-
-        return `
-          <div class="group bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 transition-all flex items-center justify-between gap-4 shadow-2xs ${isPast ? 'opacity-60 bg-slate-50/50' : ''}">
-            <div class="flex items-center gap-3.5">
-              <div class="w-12 h-12 rounded-xl bg-slate-100 flex flex-col items-center justify-center border border-slate-200/60 shrink-0">
-                <span class="text-[10px] font-bold text-slate-500 uppercase">${itemDate.toLocaleString('en', { month: 'short' })}</span>
-                <span class="text-base font-bold text-slate-900 leading-none">${itemDate.getDate()}</span>
-              </div>
-              <div>
-                <h4 class="font-semibold text-slate-900 text-sm leading-snug ${isPast ? 'line-through text-slate-400' : ''}">
-                  ${escapeHtml(item.title)}
-                </h4>
-                <div class="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                  <span class="flex items-center gap-1">
-                    <i class="ph ph-clock"></i>
-                    <span>${item.time}</span>
-                  </span>
-                  <span>·</span>
-                  <span>${item.date}</span>
-                  ${isPast ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-200/60 text-slate-500">已過期</span>' : ''}
+      list.innerHTML = filtered.map(item => {
+        if (item.isRecurring) {
+          const daysText = item.recurringDays.map(d => dayNames[d]).join('、');
+          return `
+            <div class="group bg-white p-4 rounded-xl border border-indigo-100 hover:border-indigo-200 transition-all flex items-center justify-between gap-4 shadow-2xs">
+              <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex flex-col items-center justify-center shrink-0 border border-indigo-100">
+                  <i class="ph-bold ph-repeat text-lg"></i>
+                  <span class="text-[9px] font-bold">固定</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-semibold text-slate-900 text-sm">${escapeHtml(item.title)}</h4>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-semibold">每週重複</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                    <span class="flex items-center gap-1 font-mono font-medium text-slate-700">
+                      <i class="ph ph-clock"></i>
+                      <span>${item.time}</span>
+                    </span>
+                    <span>·</span>
+                    <span class="text-indigo-600 font-medium">每週 ${daysText}</span>
+                  </div>
                 </div>
               </div>
+              <button onclick="deleteSchedule(${item.id})" class="opacity-40 group-hover:opacity-100 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition text-slate-400">
+                <i class="ph-bold ph-trash text-base"></i>
+              </button>
             </div>
-            <button onclick="deleteSchedule(${item.id})" class="opacity-40 group-hover:opacity-100 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition text-slate-400">
-              <i class="ph-bold ph-trash text-base"></i>
-            </button>
-          </div>
-        `;
+          `;
+        } else {
+          const itemDate = new Date(`${item.date}T00:00:00`);
+          const isPast = new Date(`${item.date}T${item.time}`) < new Date();
+
+          return `
+            <div class="group bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 transition-all flex items-center justify-between gap-4 shadow-2xs ${isPast ? 'opacity-60 bg-slate-50/50' : ''}">
+              <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-xl bg-slate-100 flex flex-col items-center justify-center border border-slate-200/60 shrink-0">
+                  <span class="text-[10px] font-bold text-slate-500 uppercase">${itemDate.toLocaleString('en', { month: 'short' })}</span>
+                  <span class="text-base font-bold text-slate-900 leading-none">${itemDate.getDate()}</span>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-slate-900 text-sm leading-snug ${isPast ? 'line-through text-slate-400' : ''}">
+                    ${escapeHtml(item.title)}
+                  </h4>
+                  <div class="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                    <span class="flex items-center gap-1">
+                      <i class="ph ph-clock"></i>
+                      <span>${item.time}</span>
+                    </span>
+                    <span>·</span>
+                    <span>${item.date}</span>
+                    ${isPast ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-200/60 text-slate-500">已過期</span>' : ''}
+                  </div>
+                </div>
+              </div>
+              <button onclick="deleteSchedule(${item.id})" class="opacity-40 group-hover:opacity-100 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition text-slate-400">
+                <i class="ph-bold ph-trash text-base"></i>
+              </button>
+            </div>
+          `;
+        }
       }).join('');
     }
 
-    /* ================= 可視化課表與時間軸邏輯 ================= */
+    /* ================= 課表與今日視覺化時間軸 ================= */
     function openCourseModal(day = 1, period = 3, courseId = null) {
       const modal = document.getElementById('courseModal');
       const editIdInput = document.getElementById('editCourseId');
@@ -868,12 +1113,8 @@
           ...c, name, day, period, room, teacher, color
         } : c);
       } else {
-        // 若該時段已有課程，則覆蓋
         state.courses = state.courses.filter(c => !(c.day === day && c.period === period));
-        state.courses.push({
-          id: Date.now(),
-          name, day, period, room, teacher, color
-        });
+        state.courses.push({ id: Date.now(), name, day, period, room, teacher, color });
       }
 
       saveState();
@@ -893,6 +1134,15 @@
       }
     }
 
+    function resetToDefaultCourses() {
+      if (confirm('確定要還原成預設課表內容嗎？')) {
+        state.courses = [...defaultInitialCourses];
+        saveState();
+        renderTimetable();
+        renderTodayTimeline();
+      }
+    }
+
     function renderTimetable() {
       const tbody = document.getElementById('timetableGridBody');
       const todayDay = new Date().getDay();
@@ -900,17 +1150,12 @@
       for (let d = 1; d <= 5; d++) {
         const th = document.getElementById(`col-day-${d}`);
         if (th) {
-          if (todayDay === d) {
-            th.className = 'py-3 px-3 w-[18%] bg-indigo-50/80 text-indigo-700 font-bold border-b border-indigo-200';
-          } else {
-            th.className = 'py-3 px-3 w-[18%] text-slate-600 font-semibold border-r border-slate-200/60';
-          }
+          th.className = todayDay === d ? 'py-3 px-3 w-[18%] bg-indigo-50/80 text-indigo-700 font-bold border-b border-indigo-200' : 'py-3 px-3 w-[18%] text-slate-600 font-semibold border-r border-slate-200/60';
         }
       }
 
       let rowsHtml = '';
       PERIODS.forEach(p => {
-        // 在第 5 節與第 6 節之間加入中午休息時間顯示
         if (p.id === 6) {
           rowsHtml += `
             <tr class="bg-slate-100/60 text-slate-400 text-center font-medium">
@@ -960,10 +1205,8 @@
             `;
           }
         }
-
         rowsHtml += `</tr>`;
       });
-
       tbody.innerHTML = rowsHtml;
     }
 
@@ -973,63 +1216,85 @@
       const todayDay = now.getDay();
       const todayDateStr = now.toISOString().split('T')[0];
 
-      const daysMap = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
-      document.getElementById('todayDayBadge').textContent = `今天是 ${daysMap[todayDay]}`;
-      document.getElementById('currentDateDisplay').textContent = `${todayDateStr} (${daysMap[todayDay]})`;
+      document.getElementById('todayDayBadge').textContent = `今天是 ${dayNames[todayDay]}`;
+      document.getElementById('currentDateDisplay').textContent = `${todayDateStr} (${dayNames[todayDay]})`;
 
-      // 1. 抓取今日課程
+      // 1. 今日學校課程
       const todayCourses = state.courses
         .filter(c => c.day === todayDay)
         .map(c => {
           const periodInfo = PERIODS.find(p => p.id === c.period);
           return {
             type: 'course',
-            id: c.id,
             title: c.name,
             sub: `${c.room ? c.room + ' · ' : ''}${c.teacher || '上課'}`,
             time: periodInfo ? periodInfo.start : '00:00',
             endTime: periodInfo ? periodInfo.end : '00:00',
-            color: c.color
+            badge: '學校課程'
           };
         });
 
-      // 2. 抓取今日日程
-      const todaySchedules = state.schedule
-        .filter(s => s.date === todayDateStr)
+      // 2. 今日單次日程
+      const todaySingleSchedules = state.schedule
+        .filter(s => !s.isRecurring && s.date === todayDateStr)
         .map(s => ({
-          type: 'schedule',
-          id: s.id,
+          type: 'once_schedule',
           title: s.title,
-          sub: '日程安排',
+          sub: '單次重要日程',
           time: s.time,
           endTime: '',
-          color: 'slate'
+          badge: '今日日程'
         }));
 
-      const mergedEvents = [...todayCourses, ...todaySchedules].sort((a, b) => a.time.localeCompare(b.time));
+      // 3. 今日每週固定日程 (包含今天星期的項目)
+      const todayRecurringSchedules = state.schedule
+        .filter(s => s.isRecurring && Array.isArray(s.recurringDays) && s.recurringDays.includes(todayDay))
+        .map(s => ({
+          type: 'recurring_schedule',
+          title: s.title,
+          sub: `固定重複習慣（每週 ${s.recurringDays.map(d=>dayNames[d]).join('、')}）`,
+          time: s.time,
+          endTime: '',
+          badge: '每週固定'
+        }));
+
+      // 合併並按時間排序
+      const mergedEvents = [...todayCourses, ...todaySingleSchedules, ...todayRecurringSchedules]
+        .sort((a, b) => a.time.localeCompare(b.time));
 
       if (mergedEvents.length === 0) {
         container.innerHTML = `
           <div class="py-8 text-center text-slate-400">
             <i class="ph-bold ph-coffee text-2xl mb-1 text-slate-300"></i>
-            <p class="text-xs">今天沒有排定的課程或日程安排，享受充實的一天！</p>
+            <p class="text-xs">今天沒有任何課表、固定日程或活動安排，好好放鬆或閱讀課外小事！</p>
           </div>
         `;
         return;
       }
 
       container.innerHTML = mergedEvents.map((evt, idx) => {
-        const isCourse = evt.type === 'course';
-        const badgeColor = isCourse ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-white';
+        let badgeStyle = 'bg-slate-200 text-slate-700';
+        let dotColor = 'bg-slate-700';
+
+        if (evt.type === 'course') {
+          badgeStyle = 'bg-indigo-100 text-indigo-700 font-semibold';
+          dotColor = 'bg-indigo-600';
+        } else if (evt.type === 'recurring_schedule') {
+          badgeStyle = 'bg-emerald-100 text-emerald-800 font-semibold';
+          dotColor = 'bg-emerald-600';
+        } else if (evt.type === 'once_schedule') {
+          badgeStyle = 'bg-amber-100 text-amber-800 font-semibold';
+          dotColor = 'bg-amber-500';
+        }
 
         return `
           <div class="relative pl-6 sm:pl-8 group">
             ${idx !== mergedEvents.length - 1 ? '<div class="absolute left-2.5 sm:left-3 top-6 bottom-0 w-0.5 bg-slate-200"></div>' : ''}
-            <div class="absolute left-1 sm:left-1.5 top-2 w-3.5 h-3.5 rounded-full border-2 border-white ${isCourse ? 'bg-indigo-500' : 'bg-slate-700'} shadow-xs"></div>
+            <div class="absolute left-1 sm:left-1.5 top-2 w-3.5 h-3.5 rounded-full border-2 border-white ${dotColor} shadow-xs"></div>
 
             <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 sm:p-3.5 hover:border-slate-300 transition flex items-center justify-between gap-3">
               <div class="flex items-center gap-3">
-                <span class="text-xs font-bold font-mono px-2 py-1 rounded-lg ${badgeColor}">
+                <span class="text-xs font-bold font-mono px-2 py-1 rounded-lg bg-slate-900 text-white">
                   ${evt.time} ${evt.endTime ? `- ${evt.endTime}` : ''}
                 </span>
                 <div>
@@ -1037,8 +1302,8 @@
                   <p class="text-xs text-slate-500">${escapeHtml(evt.sub)}</p>
                 </div>
               </div>
-              <span class="text-[11px] px-2 py-0.5 rounded-md ${isCourse ? 'bg-indigo-100 text-indigo-700 font-medium' : 'bg-slate-200 text-slate-600'}">
-                ${isCourse ? '學校課程' : '日程待辦'}
+              <span class="text-[11px] px-2 py-0.5 rounded-md ${badgeStyle}">
+                ${evt.badge}
               </span>
             </div>
           </div>
@@ -1046,12 +1311,224 @@
       }).join('');
     }
 
+    /* ================= 課外小事 (Knowledge, Links & 進步圖表) ================= */
+    
+    // 智慧連結解析模擬（自動從 URL 擷取標題與預設分類）
+    function autoParseLink() {
+      const urlInput = document.getElementById('knowLinkInput');
+      const titleInput = document.getElementById('knowTitleInput');
+      const catInput = document.getElementById('knowCategoryInput');
+      const rawUrl = urlInput.value.trim();
+
+      if (!rawUrl) {
+        alert('請先貼上網址連結！');
+        return;
+      }
+
+      try {
+        const urlObj = new URL(rawUrl);
+        let path = urlObj.pathname.split('/').filter(Boolean).pop() || urlObj.hostname;
+        // 清理英數字橫線為易讀字樣
+        let parsedTitle = decodeURIComponent(path).replace(/[-_]/g, ' ');
+        if (!titleInput.value) {
+          titleInput.value = parsedTitle ? `${parsedTitle.slice(0, 30)}...` : urlObj.hostname;
+        }
+
+        // 自動關鍵字歸類建議
+        const lowerUrl = rawUrl.toLowerCase();
+        if (lowerUrl.includes('novel') || lowerUrl.includes('mystery') || lowerUrl.includes('detective') || lowerUrl.includes('book')) {
+          catInput.value = '推理小說';
+        } else if (lowerUrl.includes('psych') || lowerUrl.includes('mind') || lowerUrl.includes('behavior')) {
+          catInput.value = '心理學';
+        } else if (lowerUrl.includes('code') || lowerUrl.includes('github') || lowerUrl.includes('tech') || lowerUrl.includes('ai')) {
+          catInput.value = '程式科技';
+        } else if (!catInput.value) {
+          catInput.value = '自我成長';
+        }
+      } catch (e) {
+        alert('請輸入合法的網址格式（需包含 http:// 或 https://）');
+      }
+    }
+
+    function addKnowledgeItem(e) {
+      e.preventDefault();
+      const link = document.getElementById('knowLinkInput').value.trim();
+      const title = document.getElementById('knowTitleInput').value.trim();
+      const category = document.getElementById('knowCategoryInput').value.trim();
+      const hours = parseFloat(document.getElementById('knowHoursInput').value) || 1.0;
+      const note = document.getElementById('knowNoteInput').value.trim();
+
+      if (!title || !category) return;
+
+      state.knowledge.unshift({
+        id: Date.now(),
+        url: link,
+        title,
+        category,
+        hours,
+        note,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      document.getElementById('knowLinkInput').value = '';
+      document.getElementById('knowTitleInput').value = '';
+      document.getElementById('knowNoteInput').value = '';
+
+      saveState();
+      renderKnowledgeDashboard();
+      renderKnowledgeList();
+    }
+
+    function deleteKnowledge(id) {
+      state.knowledge = state.knowledge.filter(k => k.id !== id);
+      saveState();
+      renderKnowledgeDashboard();
+      renderKnowledgeList();
+    }
+
+    // 計算領域統計並繪製進步柱狀圖與進度條
+    function renderKnowledgeDashboard() {
+      const totalHoursEl = document.getElementById('totalKnowHours');
+      const totalCountEl = document.getElementById('totalKnowCount');
+      const chartContainer = document.getElementById('chartContainer');
+      const progressContainer = document.getElementById('knowCategoryProgressBars');
+
+      const totalCount = state.knowledge.length;
+      const totalHours = state.knowledge.reduce((acc, cur) => acc + (cur.hours || 0), 0);
+
+      totalHoursEl.innerHTML = `${totalHours.toFixed(1)} <span class="text-xs font-normal">小時</span>`;
+      totalCountEl.innerHTML = `${totalCount} <span class="text-xs font-normal">篇</span>`;
+
+      // 彙總各類別時數與篇數
+      const categoryMap = {};
+      state.knowledge.forEach(k => {
+        const cat = k.category || '未分類';
+        if (!categoryMap[cat]) {
+          categoryMap[cat] = { hours: 0, count: 0 };
+        }
+        categoryMap[cat].hours += (k.hours || 0);
+        categoryMap[cat].count += 1;
+      });
+
+      const categories = Object.keys(categoryMap);
+
+      // 更新篩選下拉選單
+      const filterSelect = document.getElementById('filterCategorySelect');
+      const currentVal = filterSelect.value;
+      filterSelect.innerHTML = '<option value="all">所有領域分類</option>' + 
+        categories.map(c => `<option value="${escapeHtml(c)}" ${c === currentVal ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
+
+      if (categories.length === 0) {
+        chartContainer.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-slate-400">目前尚無累積數據</div>';
+        progressContainer.innerHTML = '<p class="text-xs text-slate-400">尚無領域分佈</p>';
+        return;
+      }
+
+      // 1. 渲染進度條
+      progressContainer.innerHTML = categories.map(cat => {
+        const item = categoryMap[cat];
+        const pct = totalHours > 0 ? Math.round((item.hours / totalHours) * 100) : 0;
+        return `
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-medium text-slate-700">${escapeHtml(cat)} (${item.count}篇)</span>
+              <span class="text-slate-500 font-mono">${item.hours.toFixed(1)}h (${pct}%)</span>
+            </div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full bg-amber-500 rounded-full" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 2. 渲染可視化柱狀圖 (Bar Chart)
+      const maxHours = Math.max(...categories.map(c => categoryMap[c].hours), 1);
+
+      chartContainer.innerHTML = categories.map(cat => {
+        const item = categoryMap[cat];
+        const heightPct = Math.max(Math.round((item.hours / maxHours) * 100), 12);
+
+        return `
+          <div class="flex-1 flex flex-col items-center h-full justify-end group">
+            <span class="text-[10px] font-mono font-bold text-slate-600 mb-1 opacity-80 group-hover:opacity-100">${item.hours.toFixed(1)}h</span>
+            <div class="w-full max-w-[42px] bg-indigo-100 group-hover:bg-indigo-600 rounded-t-xl transition-all duration-300 relative flex items-end justify-center shadow-xs"
+                 style="height: ${heightPct}%;">
+              <div class="w-full h-1 bg-indigo-500 rounded-t-xl"></div>
+            </div>
+            <span class="text-[11px] font-semibold text-slate-700 mt-2 truncate max-w-[70px] text-center" title="${escapeHtml(cat)}">
+              ${escapeHtml(cat)}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderKnowledgeList() {
+      const container = document.getElementById('knowledgeList');
+      const emptyEl = document.getElementById('emptyKnowledgeList');
+      const filterCat = document.getElementById('filterCategorySelect').value;
+
+      let filtered = state.knowledge;
+      if (filterCat !== 'all') {
+        filtered = filtered.filter(k => k.category === filterCat);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+
+      container.innerHTML = filtered.map(item => `
+        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-xs hover:border-slate-300 transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold border border-amber-200">
+                ${escapeHtml(item.category)}
+              </span>
+              <div class="flex items-center gap-1">
+                <span class="text-xs font-mono text-slate-400">${item.date}</span>
+                <button onclick="deleteKnowledge(${item.id})" class="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-600 transition">
+                  <i class="ph-bold ph-trash text-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            <h4 class="font-bold text-slate-900 text-sm leading-snug line-clamp-2">${escapeHtml(item.title)}</h4>
+
+            ${item.note ? `
+              <p class="text-xs text-slate-600 bg-slate-50 rounded-xl p-2.5 mt-2.5 border border-slate-100 leading-relaxed whitespace-pre-wrap">
+                <span class="font-semibold text-slate-700">筆記心得：</span>${escapeHtml(item.note)}
+              </p>
+            ` : ''}
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span class="flex items-center gap-1 font-mono font-medium text-slate-700">
+              <i class="ph-bold ph-timer text-amber-600"></i>
+              <span>研讀 ${item.hours} 小時</span>
+            </span>
+            ${item.url ? `
+              <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer"
+                 class="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-medium">
+                <span>前往連結</span>
+                <i class="ph-bold ph-arrow-square-out"></i>
+              </a>
+            ` : '<span class="text-slate-400">純備忘</span>'}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* ================= 徽章更新與初始化 ================= */
     function updateBadges() {
       const activeTodos = state.todos.filter(t => !t.completed).length;
       document.getElementById('badge-todo-count').textContent = activeTodos;
       document.getElementById('badge-notes-count').textContent = state.notes.length;
       document.getElementById('badge-schedule-count').textContent = state.schedule.length;
       document.getElementById('badge-timetable-count').textContent = state.courses.length;
+      document.getElementById('badge-knowledge-count').textContent = state.knowledge.length;
     }
 
     function escapeHtml(str) {
@@ -1071,6 +1548,8 @@
       renderSchedule();
       renderTimetable();
       renderTodayTimeline();
+      renderKnowledgeDashboard();
+      renderKnowledgeList();
       updateBadges();
     };
   </script>
